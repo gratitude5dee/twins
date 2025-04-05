@@ -1,5 +1,5 @@
 
-from typing import Any
+from typing import Any, Dict
 
 from bots.persistent_context import PersistentContext
 from bots.rtvi import create_rtvi_processor
@@ -29,7 +29,7 @@ from pipecat.services.gemini_multimodal_live.gemini import (
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
 
-async def build_system_prompt(twin_data):
+async def build_system_prompt(twin_data: Dict) -> str:
     """Builds a system prompt based on twin personality data"""
     if not twin_data:
         # If no twin data, return empty string and let default prompt be used
