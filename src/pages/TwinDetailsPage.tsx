@@ -15,14 +15,19 @@ import { useToast } from '@/hooks/use-toast';
 type TwinDetail = {
   id: string;
   name: string;
-  description: string;
-  image_url: string;
-  status: string;
+  description: string | null;
+  image_url: string | null;
+  status: string | null;
   created_at: string;
-  tags: string[];
+  tags: string[] | null;
   features: Record<string, any> | null;
   model_data: Record<string, any> | null;
-  processing_status: string;
+  processing_status: string | null;
+};
+
+type Category = {
+  id: string;
+  name: string;
 };
 
 const TwinDetailsPage = () => {
@@ -32,7 +37,7 @@ const TwinDetailsPage = () => {
   const { toast } = useToast();
   const [twin, setTwin] = useState<TwinDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [twinCategories, setTwinCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -41,6 +46,7 @@ const TwinDetailsPage = () => {
 
       try {
         setLoading(true);
+        // Fetch the twin data
         const { data: twinData, error: twinError } = await supabase
           .from('digital_twins')
           .select('*')
@@ -59,27 +65,34 @@ const TwinDetailsPage = () => {
           return;
         }
 
-        // Fetch twin categories
-        const { data: categoryData } = await supabase
-          .from('twin_categories')
-          .select('category_id')
-          .eq('twin_id', twinId);
+        // Use raw SQL query for fetching twin categories since twin_categories might not be in types
+        const { data: categoryJoins, error: categoryJoinsError } = await supabase
+          .rpc('get_twin_categories', { twin_id_param: twinId });
 
-        if (categoryData) {
-          setTwinCategories(categoryData.map(c => c.category_id));
+        if (!categoryJoinsError && categoryJoins) {
+          const categoryIds = categoryJoins.map(item => item.category_id);
+          setTwinCategories(categoryIds);
           
           // Fetch category details
-          const { data: categories } = await supabase
-            .from('categories')
-            .select('id, name')
-            .in('id', categoryData.map(c => c.category_id));
-          
-          if (categories) {
-            setCategories(categories);
+          if (categoryIds.length > 0) {
+            const { data: categoryData, error: categoriesError } = await supabase
+              .rpc('get_categories_by_ids', { category_ids_param: categoryIds });
+            
+            if (!categoriesError && categoryData) {
+              setCategories(categoryData);
+            }
           }
         }
 
-        setTwin(twinData as TwinDetail);
+        // Need to explicitly cast twinData to match the TwinDetail type with all required fields
+        const twinWithDefaults: TwinDetail = {
+          ...twinData,
+          features: twinData.features || null,
+          model_data: twinData.model_data || null,
+          processing_status: twinData.processing_status || 'pending'
+        };
+
+        setTwin(twinWithDefaults);
       } catch (error: any) {
         console.error('Error fetching twin:', error);
         toast({
@@ -295,7 +308,7 @@ const TwinDetailsPage = () => {
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Status</h4>
                   <Badge variant={twin.status === 'active' ? 'default' : 'secondary'}>
-                    {twin.status}
+                    {twin.status || 'Unknown'}
                   </Badge>
                 </div>
                 {categories.length > 0 && (
