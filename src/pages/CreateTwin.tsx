@@ -518,16 +518,7 @@ const CreateTwin = () => {
         </div>
 
         <div className="flex justify-center mb-8">
-          <div className="flex space-x-6">
-            <Button variant={viewMode === 'wizard' ? 'default' : 'outline'} className="flex items-center gap-2" onClick={() => setViewMode('wizard')}>
-              <Settings className="h-4 w-4" />
-              Step-by-Step Wizard
-            </Button>
-            <Button variant={viewMode === 'form' ? 'default' : 'outline'} className="flex items-center gap-2" onClick={() => setViewMode('form')}>
-              <Settings className="h-4 w-4" />
-              Detailed Form
-            </Button>
-          </div>
+          
         </div>
 
         <div className="flex justify-center mb-8">
