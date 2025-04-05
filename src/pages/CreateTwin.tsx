@@ -358,8 +358,8 @@ const CreateTwin = () => {
 
   // Templates for quick setup
   const templates = [{
-    id: "eliza",
-    name: "Eliza",
+    id: "WZRD",
+    name: "WZRD",
     description: "Classic therapeutic chatbot"
   }, {
     id: "trump",
