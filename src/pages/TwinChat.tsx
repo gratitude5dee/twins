@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -119,7 +120,9 @@ const TwinChat = () => {
         return;
       }
 
-      setConversationId(newConversation.id);
+      if (newConversation) {
+        setConversationId(newConversation.id);
+      }
     };
 
     fetchOrCreateConversation();

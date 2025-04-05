@@ -121,26 +121,30 @@ const CreateTwin = () => {
         throw new Error(`Error creating twin: ${error.message}`);
       }
       
-      // Create initial suggested questions
-      const defaultQuestions = [
-        `Tell me about ${values.name}`,
-        `What can ${values.name} do?`,
-        `How does ${values.name} work?`
-      ];
-      
-      await supabase.from('suggested_questions').insert(
-        defaultQuestions.map(question => ({
-          twin_id: twin.id,
-          question
-        }))
-      );
-      
-      toast({
-        title: "Digital Twin created!",
-        description: `Your twin "${values.name}" has been created successfully.`,
-      });
-      
-      navigate(`/chat/${twin.id}`);
+      if (twin) {
+        // Create initial suggested questions
+        const defaultQuestions = [
+          `Tell me about ${values.name}`,
+          `What can ${values.name} do?`,
+          `How does ${values.name} work?`
+        ];
+        
+        await supabase.from('suggested_questions').insert(
+          defaultQuestions.map(question => ({
+            twin_id: twin.id,
+            question
+          }))
+        );
+        
+        toast({
+          title: "Digital Twin created!",
+          description: `Your twin "${values.name}" has been created successfully.`,
+        });
+        
+        navigate(`/chat/${twin.id}`);
+      } else {
+        throw new Error("Failed to create digital twin");
+      }
       
     } catch (error: any) {
       toast({
