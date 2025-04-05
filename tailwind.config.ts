@@ -79,6 +79,13 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			boxShadow: {
+				subtle: '0 2px 10px rgba(0, 0, 0, 0.05)',
+				card: '0 4px 20px rgba(0, 0, 0, 0.08)',
+				'card-hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+				glow: '0 0 15px rgba(107, 70, 193, 0.5)',
+				'glow-blue': '0 0 15px rgba(79, 70, 229, 0.6)',
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {
@@ -99,13 +106,42 @@ export default {
 				'pulse-slow': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' },
+				},
+				shimmer: {
+					'0%': { backgroundPosition: '-500px 0' },
+					'100%': { backgroundPosition: '500px 0' },
+				},
+				float: {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' },
+				},
+				tilt: {
+					'0%, 100%': { transform: 'rotate(-1deg)' },
+					'50%': { transform: 'rotate(1deg)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-slow': 'pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-			}
+				'shimmer': 'shimmer 2s infinite linear',
+				'float': 'float 3s ease-in-out infinite',
+				'tilt': 'tilt 5s ease-in-out infinite',
+			},
+			transitionProperty: {
+				'height': 'height',
+				'spacing': 'margin, padding',
+			},
+			transitionDuration: {
+				'2000': '2000ms',
+			},
+			backdropBlur: {
+				xs: '2px',
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'card-gradient': 'linear-gradient(to bottom right, var(--card), var(--secondary)/10)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
