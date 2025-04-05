@@ -11,14 +11,26 @@ import Settings from "@/components/Settings";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import emitter from "@/lib/eventEmitter";
 import { Message } from "@/lib/messages";
+import { useConversation } from "@/hooks/useConversation";
 
+/**
+ * ClientPage Component
+ * 
+ * IMPORTANT:
+ * 1. The Python backend server from the `pipecat-ai` repository's `/server` directory 
+ *    must be running for chat functionality to work.
+ * 2. Make sure your .env file contains VITE_SERVER_URL pointing to the backend
+ *    (e.g., http://127.0.0.1:7860/api)
+ * 3. If you're using authentication, you may need to integrate it with the API calls.
+ */
 export const ClientPage = () => {
   const { toast } = useToast();
   const { conversationId, conversationType, setConversationType } = useAppState();
   const [showSettings, setShowSettings] = useState(false);
   
-  // Mock data for messages - this will be replaced with actual data fetching in a future step
-  const [messages, setMessages] = useState<Message[]>([]);
+  // Fetch conversation messages when conversationId changes
+  const { conversation } = useConversation(conversationId);
+  const messages = conversation?.messages || [];
 
   useEffect(() => {
     // Register event listeners

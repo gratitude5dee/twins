@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { ClientPage } from '@/components/ClientPage';
 import { AppStateProvider } from '@/contexts/AppStateProvider';
 
+/**
+ * TwinChat Component
+ * 
+ * IMPORTANT:
+ * For chat functionality to work properly:
+ * 1. The Python backend server must be running
+ * 2. The VITE_SERVER_URL environment variable must be set correctly
+ */
 interface DigitalTwin {
   id: string;
   name: string;

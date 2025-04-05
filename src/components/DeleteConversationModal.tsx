@@ -1,13 +1,13 @@
 
 import { Button } from "@/components/ui/button";
-import { 
-  Dialog, 
+import {
+  Dialog,
+  DialogClose,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAppState } from "@/hooks/useAppState";
@@ -68,7 +68,7 @@ export default function DeleteConversationModal() {
 
   return (
     <Dialog open={Boolean(conversationId)} onOpenChange={handleOpenChange}>
-      <DialogContent noCloseButton={isDeleting}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete conversation</DialogTitle>
         </DialogHeader>

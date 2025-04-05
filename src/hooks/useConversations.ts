@@ -10,6 +10,12 @@ interface Props {
   searchQuery?: string;
 }
 
+/**
+ * useConversations hook
+ * 
+ * Fetches conversations from the pipecat-ai backend server.
+ * Requires the VITE_SERVER_URL environment variable to be set.
+ */
 export const useConversations = ({ searchQuery = "" }: Props = {}) => {
   const { data, ...query } = useInfiniteQuery<
     ConversationModel[],
@@ -27,6 +33,12 @@ export const useConversations = ({ searchQuery = "" }: Props = {}) => {
       return (lastPageParam as number) + 1;
     },
     queryFn: async ({ pageParam }) => {
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      if (!serverUrl) {
+        console.error("VITE_SERVER_URL environment variable is not set");
+        return [];
+      }
+
       const params = new URLSearchParams();
       params.append("page", String(pageParam));
       params.append("per_page", "20");
@@ -34,14 +46,15 @@ export const useConversations = ({ searchQuery = "" }: Props = {}) => {
       
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/conversations?${params.toString()}`
+          `${serverUrl}/conversations?${params.toString()}`
         );
         if (response.ok) {
           return (await response.json()) as ConversationModel[];
         }
+        console.error("Failed to fetch conversations:", response.statusText);
         return [];
       } catch (e) {
-        console.error(e);
+        console.error("Error fetching conversations:", e);
         return [];
       }
     },

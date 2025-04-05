@@ -14,6 +14,18 @@ import TwinChat from "./pages/TwinChat";
 import TwinDetailsPage from "./pages/TwinDetailsPage";
 import NotFound from "./pages/NotFound";
 
+/**
+ * App Component
+ * 
+ * IMPORTANT:
+ * 1. For chat functionality to work, the Python backend server from the pipecat-ai
+ *    repository (/server directory) must be running.
+ * 2. Ensure your .env file has VITE_SERVER_URL=http://127.0.0.1:7860/api
+ *    (or the appropriate URL for your server).
+ * 3. Run the backend server with: `cd server && python sesame.py run`
+ */
+
+// We use a single QueryClient instance for the entire app
 const queryClient = new QueryClient();
 
 const App = () => (
