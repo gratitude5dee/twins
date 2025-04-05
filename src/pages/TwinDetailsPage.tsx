@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, TwinDetail, Category } from '@/integrations/supabase/client';
@@ -67,7 +68,7 @@ const TwinDetailsPage = () => {
 
         // Cast the data to TwinDetail type
         const twinWithDefaults: TwinDetail = {
-          ...twinData as TwinDetail,
+          ...twinData as unknown as TwinDetail,
           features: twinData.features || null,
           model_data: twinData.model_data || null,
           processing_status: twinData.processing_status || 'pending'
@@ -164,7 +165,7 @@ const TwinDetailsPage = () => {
             <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mr-2">
               <ArrowLeft size={18} />
             </Button>
-            <h1 className="text-2xl font-bold">{twin.name}</h1>
+            <h1 className="text-2xl font-bold">{twin?.name}</h1>
           </div>
           <div className="flex space-x-2">
             <Button size="sm" variant="outline" onClick={handleEdit}>
@@ -185,7 +186,7 @@ const TwinDetailsPage = () => {
         <div className="grid gap-6 md:grid-cols-[1fr_300px]">
           <div>
             <Card className="mb-6 overflow-hidden">
-              {twin.image_url ? (
+              {twin?.image_url ? (
                 <div className="relative aspect-video bg-muted">
                   <img 
                     src={twin.image_url} 
@@ -222,11 +223,11 @@ const TwinDetailsPage = () => {
                     <CardTitle>Description</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {twin.description || <span className="text-muted-foreground">No description provided</span>}
+                    {twin?.description || <span className="text-muted-foreground">No description provided</span>}
                   </CardContent>
                 </Card>
                 
-                {twin.tags && twin.tags.length > 0 && (
+                {twin?.tags && twin.tags.length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Tags</CardTitle>
@@ -247,7 +248,7 @@ const TwinDetailsPage = () => {
                     <CardDescription>Features extracted from the image during processing</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {twin.features ? (
+                    {twin?.features ? (
                       <pre className="bg-muted p-4 rounded-md overflow-auto max-h-96">
                         {JSON.stringify(twin.features, null, 2)}
                       </pre>
@@ -265,7 +266,7 @@ const TwinDetailsPage = () => {
                     <CardDescription>Technical data for the digital twin model</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {twin.model_data ? (
+                    {twin?.model_data ? (
                       <pre className="bg-muted p-4 rounded-md overflow-auto max-h-96">
                         {JSON.stringify(twin.model_data, null, 2)}
                       </pre>
@@ -286,12 +287,12 @@ const TwinDetailsPage = () => {
               <CardContent className="space-y-4">
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Created</h4>
-                  <p>{new Date(twin.created_at).toLocaleDateString()}</p>
+                  <p>{twin && new Date(twin.created_at).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Status</h4>
-                  <Badge variant={twin.status === 'active' ? 'default' : 'secondary'}>
-                    {twin.status || 'Unknown'}
+                  <Badge variant={twin?.status === 'active' ? 'default' : 'secondary'}>
+                    {twin?.status || 'Unknown'}
                   </Badge>
                 </div>
                 {categories.length > 0 && (
