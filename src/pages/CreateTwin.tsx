@@ -13,12 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Layout from '@/components/Layout';
 import TwinImageUpload from '@/components/TwinImageUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, Category } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Bot, Settings, ImagePlus, ChevronsUpDown, Plus, X } from 'lucide-react';
+import { Bot, Settings, ImagePlus, ChevronsUpDown, Plus, X, UserCircle, BrainCircuit, MessageSquare, Share, Zap } from 'lucide-react';
 
 // Supabase URL for edge function calls
 const supabaseUrl = 'https://juvfuvamiszfyinyxlxw.supabase.co';
@@ -364,7 +365,67 @@ const CreateTwin = () => {
 
         <div className="flex justify-center mb-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl">
-            
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-5 mb-4">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="basic" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Basic Info</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Basic agent information</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="model" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <BrainCircuit className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Model</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Model provider and settings</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="personality" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Personality</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Agent personality and behavior</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="integrations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <Share className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Integrations</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Connect to external platforms</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="secrets" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <Zap className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Secrets</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>API keys and sensitive information</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </TabsList>
           </Tabs>
         </div>
 
@@ -659,7 +720,7 @@ const CreateTwin = () => {
                               }} />
                                           </FormControl>
                                           <div className="space-y-1 leading-none">
-                                            <FormLabel className="font-normal">
+                                            <FormLabel className="font-medium">
                                               {category.name}
                                             </FormLabel>
                                             {category.description && <FormDescription>
