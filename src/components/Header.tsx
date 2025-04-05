@@ -25,7 +25,7 @@ const Header = () => {
           <div className="w-9 h-9 rounded-full gradient-bg flex items-center justify-center text-white shadow-md">
             <Sparkles size={20} />
           </div>
-          <span className="font-display font-bold text-xl">agency : OS digital twin repoistory</span>
+          <span className="font-display font-bold text-xl">agency : OS digital twin repository</span>
         </Link>
         
         <div className="flex items-center space-x-4">
