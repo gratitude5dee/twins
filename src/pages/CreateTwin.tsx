@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,19 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import Layout from '@/components/Layout';
 import TwinImageUpload from '@/components/TwinImageUpload';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, Category } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Bot } from 'lucide-react';
 
 // Supabase URL for edge function calls
 const supabaseUrl = 'https://juvfuvamiszfyinyxlxw.supabase.co';
-
-// Type definition for categories
-type Category = {
-  id: string;
-  name: string;
-  description: string | null;
-};
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -62,7 +54,7 @@ const CreateTwin = () => {
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
-        // Use a direct table query for categories, which should work as it exists in the database
+        // Use a direct table query for categories
         const { data, error } = await supabase
           .from('categories')
           .select('id, name, description');
@@ -140,17 +132,17 @@ const CreateTwin = () => {
 
       // Insert category associations if categories were selected
       if (values.categories.length > 0) {
-        for (const categoryId of values.categories) {
-          const { error: categoryError } = await supabase
-            .from('twin_categories')
-            .insert({
-              twin_id: twin.id,
-              category_id: categoryId
-            });
+        const categoryAssociations = values.categories.map(categoryId => ({
+          twin_id: twin.id,
+          category_id: categoryId
+        }));
+        
+        const { error: categoryError } = await supabase
+          .from('twin_categories')
+          .insert(categoryAssociations);
 
-          if (categoryError) {
-            console.error('Error associating category:', categoryError);
-          }
+        if (categoryError) {
+          console.error('Error associating categories:', categoryError);
         }
       }
 

@@ -16,3 +16,27 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+
+// Add custom type definitions for our extended database schema
+export type TwinDetail = {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  status: string | null;
+  created_at: string;
+  tags: string[] | null;
+  features: Record<string, any> | null;
+  model_data: Record<string, any> | null;
+  processing_status: string | null;
+  owner_id: string;
+  updated_at: string;
+  parent_id: string | null;
+  related_twin_ids: string[] | null;
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  description?: string | null;
+};

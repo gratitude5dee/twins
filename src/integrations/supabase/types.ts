@@ -69,11 +69,14 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          features: Json | null
           id: string
           image_url: string | null
+          model_data: Json | null
           name: string
           owner_id: string
           parent_id: string | null
+          processing_status: string | null
           related_twin_ids: string[] | null
           status: string | null
           tags: string[] | null
@@ -82,11 +85,14 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          features?: Json | null
           id?: string
           image_url?: string | null
+          model_data?: Json | null
           name: string
           owner_id: string
           parent_id?: string | null
+          processing_status?: string | null
           related_twin_ids?: string[] | null
           status?: string | null
           tags?: string[] | null
@@ -95,11 +101,14 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          features?: Json | null
           id?: string
           image_url?: string | null
+          model_data?: Json | null
           name?: string
           owner_id?: string
           parent_id?: string | null
+          processing_status?: string | null
           related_twin_ids?: string[] | null
           status?: string | null
           tags?: string[] | null

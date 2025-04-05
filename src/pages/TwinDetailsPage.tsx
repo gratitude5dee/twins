@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, TwinDetail, Category } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -11,28 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, MessageCircle, Pencil, Share2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-type TwinDetail = {
-  id: string;
-  name: string;
-  description: string | null;
-  image_url: string | null;
-  status: string | null;
-  created_at: string;
-  tags: string[] | null;
-  features: Record<string, any> | null;
-  model_data: Record<string, any> | null;
-  processing_status: string | null;
-  owner_id: string;
-  updated_at: string;
-  parent_id: string | null;
-  related_twin_ids: string[] | null;
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
 
 const TwinDetailsPage = () => {
   const { twinId } = useParams();
@@ -83,14 +60,14 @@ const TwinDetailsPage = () => {
               .rpc('get_categories_by_ids', { category_ids_param: categoryIds });
             
             if (!categoriesError && categoryData) {
-              setCategories(categoryData);
+              setCategories(categoryData as Category[]);
             }
           }
         }
 
-        // Since the database might not have these fields yet, provide defaults
+        // Cast the data to TwinDetail type
         const twinWithDefaults: TwinDetail = {
-          ...twinData,
+          ...twinData as TwinDetail,
           features: twinData.features || null,
           model_data: twinData.model_data || null,
           processing_status: twinData.processing_status || 'pending'
