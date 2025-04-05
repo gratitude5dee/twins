@@ -14,7 +14,6 @@ import TwinImageUpload from '@/components/TwinImageUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/ui/checkbox';
-import { v4 as uuidv4 } from 'uuid';
 import { Bot } from 'lucide-react';
 
 // Supabase URL for edge function calls
@@ -62,21 +61,32 @@ const CreateTwin = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name, description');
-        
-      if (error) {
-        console.error('Error fetching categories:', error);
+      try {
+        // Use a direct table query for categories, which should work as it exists in the database
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, name, description');
+          
+        if (error) {
+          console.error('Error fetching categories:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load categories",
+            variant: "destructive",
+          });
+        } else if (data) {
+          setCategories(data as Category[]);
+        }
+      } catch (err) {
+        console.error('Exception fetching categories:', err);
         toast({
           title: "Error",
           description: "Failed to load categories",
           variant: "destructive",
         });
-      } else if (data) {
-        setCategories(data);
+      } finally {
+        setIsLoadingCategories(false);
       }
-      setIsLoadingCategories(false);
     };
 
     fetchCategories();
@@ -116,7 +126,9 @@ const CreateTwin = () => {
             owner_id: user.id,
             tags: tagsArray,
             status: 'active',
-            processing_status: imageUrl ? 'pending' : 'not_applicable'
+            processing_status: imageUrl ? 'pending' : 'not_applicable',
+            features: null,
+            model_data: null
           }
         ])
         .select()
@@ -128,22 +140,17 @@ const CreateTwin = () => {
 
       // Insert category associations if categories were selected
       if (values.categories.length > 0) {
-        const categoryInserts = values.categories.map(categoryId => ({
-          twin_id: twin.id,
-          category_id: categoryId
-        }));
+        for (const categoryId of values.categories) {
+          const { error: categoryError } = await supabase
+            .from('twin_categories')
+            .insert({
+              twin_id: twin.id,
+              category_id: categoryId
+            });
 
-        const { error: categoryError } = await supabase
-          .from('twin_categories')
-          .insert(categoryInserts);
-
-        if (categoryError) {
-          console.error('Error associating categories:', categoryError);
-          toast({
-            title: "Warning",
-            description: "Twin created, but there was an issue associating categories.",
-            variant: "destructive",
-          });
+          if (categoryError) {
+            console.error('Error associating category:', categoryError);
+          }
         }
       }
 

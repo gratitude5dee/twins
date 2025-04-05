@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,20 +73,22 @@ const TwinDetailsPage = () => {
         const { data: categoryJoins, error: categoryJoinsError } = await supabase
           .rpc('get_twin_categories', { twin_id_param: twinId });
 
-        if (!categoryJoinsError && categoryJoins && categoryJoins.length > 0) {
+        if (!categoryJoinsError && categoryJoins) {
           const categoryIds = categoryJoins.map(item => item.category_id);
           setTwinCategories(categoryIds);
           
-          // Fetch category details using the RPC function
-          const { data: categoryData, error: categoriesError } = await supabase
-            .rpc('get_categories_by_ids', { category_ids_param: categoryIds });
-          
-          if (!categoriesError && categoryData) {
-            setCategories(categoryData);
+          if (categoryIds.length > 0) {
+            // Fetch category details using the RPC function
+            const { data: categoryData, error: categoriesError } = await supabase
+              .rpc('get_categories_by_ids', { category_ids_param: categoryIds });
+            
+            if (!categoriesError && categoryData) {
+              setCategories(categoryData);
+            }
           }
         }
 
-        // Add missing fields with defaults to ensure the twin object matches TwinDetail type
+        // Since the database might not have these fields yet, provide defaults
         const twinWithDefaults: TwinDetail = {
           ...twinData,
           features: twinData.features || null,
@@ -212,13 +215,15 @@ const TwinDetailsPage = () => {
                     alt={twin.name}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-4 right-4">
-                    <Badge variant={twin.processing_status === 'completed' ? 'default' : 'secondary'}>
-                      {twin.processing_status === 'completed' ? 'Ready' : 
-                       twin.processing_status === 'processing' ? 'Processing' : 
-                       twin.processing_status === 'error' ? 'Error' : 'Pending'}
-                    </Badge>
-                  </div>
+                  {twin.processing_status && (
+                    <div className="absolute top-4 right-4">
+                      <Badge variant={twin.processing_status === 'completed' ? 'default' : 'secondary'}>
+                        {twin.processing_status === 'completed' ? 'Ready' : 
+                         twin.processing_status === 'processing' ? 'Processing' : 
+                         twin.processing_status === 'error' ? 'Error' : 'Pending'}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="aspect-video bg-muted flex items-center justify-center">
