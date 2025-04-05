@@ -104,6 +104,10 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
   }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
 }
 
 @layer components {
@@ -117,7 +121,7 @@
 
   /* Card hover effects */
   .hover-card {
-    @apply transition-all duration-200 ease-out hover:shadow-lg hover:scale-[1.02] hover:border-primary/20;
+    @apply transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] hover:border-primary/20;
   }
 
   /* Glassmorphism */
@@ -127,20 +131,25 @@
 
   /* Button micro-interactions */
   .interactive-button {
-    @apply transition-all duration-200 ease-out hover:scale-105 active:scale-95;
+    @apply transition-all duration-300 ease-out hover:scale-105 active:scale-95 focus:scale-105 focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
   }
 
   /* Animation utilities */
   .fade-in {
-    @apply animate-[fadeIn_0.3s_ease-out_forwards];
+    @apply animate-[fadeIn_0.5s_ease-out_forwards];
   }
 
   .slide-up {
-    @apply animate-[slideUp_0.3s_ease-out_forwards];
+    @apply animate-[slideUp_0.5s_ease-out_forwards];
+  }
+
+  /* 3D perspective container */
+  .perspective {
+    perspective: 1000px;
   }
 }
 
-/* Custom animations */
+/* Advanced animation keyframes */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -153,7 +162,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -168,4 +177,33 @@
   50% {
     opacity: 0.7;
   }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Enhanced focus styles for accessibility */
+:focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2;
+}
+
+/* Custom utilities for animations and effects */
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px 0 rgba(var(--primary), 0.3);
+}
+
+.shadow-glow-blue {
+  box-shadow: 0 0 25px 0 rgba(79, 70, 229, 0.3);
 }
