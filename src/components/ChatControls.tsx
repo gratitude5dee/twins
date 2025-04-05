@@ -4,53 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { useAppState } from "@/hooks/useAppState";
-import { RTVIEvent } from "@pipecat-ai/client-js";
-import { useRTVIClient, useRTVIClientEvent } from "@pipecat-ai/client-react";
 
 const ChatControls = () => {
   const [inputValue, setInputValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const { conversationId, conversationType } = useAppState();
-  const rtviClient = useRTVIClient();
-
-  // Reset processing state when bot stops thinking
-  useRTVIClientEvent(
-    RTVIEvent.BotFinishedThinking,
-    () => {
-      setIsProcessing(false);
-    },
-  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || !rtviClient || !conversationId || isProcessing) return;
+    if (!inputValue.trim() || !conversationId || isProcessing) return;
 
     setIsProcessing(true);
     const message = inputValue;
     setInputValue("");
 
     try {
-      // Send the text message to the AI
-      await rtviClient.action({
-        service: "llm",
-        action: "append_to_messages",
-        arguments: [
-          {
-            name: "messages",
-            value: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: message,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
+      // In a real implementation, this would send the message to the AI
+      console.log("Sending message:", message);
+      
+      // Simulate processing
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 1000);
     } catch (error) {
       console.error("Error sending message:", error);
       setIsProcessing(false);

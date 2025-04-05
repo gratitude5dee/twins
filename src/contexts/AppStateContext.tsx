@@ -2,7 +2,6 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
 export type InteractionMode = "conversational" | "informational";
-
 export type ConversationType = "voice-to-voice" | "text-voice" | null;
 
 interface AppStateContextValue {

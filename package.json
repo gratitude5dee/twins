@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@pipecat-ai/client-js": "^0.3.1",
+    "@pipecat-ai/daily-transport": "^0.3.2",
+    "@pipecat-ai/realtime-websocket-transport": "^0.3.3",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",

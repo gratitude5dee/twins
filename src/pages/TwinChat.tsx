@@ -11,24 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { ClientPage } from '@/components/ClientPage';
 import { AppStateProvider } from '@/contexts/AppStateProvider';
 
-// Create a context provider to hold the AppState
-const TwinChatContextProvider = ({ children, twinId, twin }) => {
-  // In a real implementation, you would load conversation information
-  // from your database and set up the AppStateProvider with the right values
-  // For now, we'll just set conversationId to twinId
-  return (
-    <AppStateProvider
-      geminiApiKey={import.meta.env.VITE_GEMINI_API_KEY || ""}
-      webrtcEnabled={true}
-      websocketEnabled={true}
-      initialConversationId={twinId}
-      initialTwinData={twin}
-    >
-      {children}
-    </AppStateProvider>
-  );
-};
-
 interface DigitalTwin {
   id: string;
   name: string;
@@ -130,9 +112,12 @@ const TwinChat = () => {
 
         {/* Client Page with Context Provider */}
         <div className="flex-1 overflow-auto">
-          <TwinChatContextProvider twinId={twinId} twin={twin}>
+          <AppStateProvider 
+            initialConversationId={twinId} 
+            initialTwinData={twin}
+          >
             <ClientPage />
-          </TwinChatContextProvider>
+          </AppStateProvider>
         </div>
       </div>
     </Layout>

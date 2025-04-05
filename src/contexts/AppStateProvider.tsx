@@ -7,18 +7,18 @@ import {
 import { useDeferredValue, useEffect, useState } from "react";
 
 interface Props {
-  geminiApiKey: string;
-  websocketEnabled: boolean;
-  webrtcEnabled: boolean;
+  geminiApiKey?: string;
+  websocketEnabled?: boolean;
+  webrtcEnabled?: boolean;
   initialConversationId?: string;
   initialTwinData?: any;
 }
 
 export const AppStateProvider: React.FC<React.PropsWithChildren<Props>> = ({
   children,
-  geminiApiKey,
-  webrtcEnabled,
-  websocketEnabled,
+  geminiApiKey = "",
+  webrtcEnabled = false,
+  websocketEnabled = false,
   initialConversationId = "",
   initialTwinData = null,
 }) => {

@@ -1,41 +1,17 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useAppState } from "@/hooks/useAppState";
-import { RTVIEvent } from "@pipecat-ai/client-js";
-import { useRTVIClientEvent } from "@pipecat-ai/client-react";
 import { useConversation } from "@/hooks/useConversation";
-import { Message, normalizeMessageText } from "@/lib/messages";
+import { Message } from "@/lib/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User } from "lucide-react";
 import AutoScrollToBottom from "@/components/AutoScrollToBottom";
 
 const ChatMessages = () => {
   const { conversationId } = useAppState();
-  const [isBotSpeaking, setIsBotSpeaking] = useState(false);
   const { conversation } = useConversation(conversationId);
 
   const messages = conversation?.messages || [];
-
-  useRTVIClientEvent(
-    RTVIEvent.BotStartedSpeaking,
-    () => {
-      setIsBotSpeaking(true);
-    }
-  );
-  
-  useRTVIClientEvent(
-    RTVIEvent.BotStoppedSpeaking,
-    () => {
-      setIsBotSpeaking(false);
-    }
-  );
-  
-  useRTVIClientEvent(
-    RTVIEvent.Disconnected,
-    () => {
-      setIsBotSpeaking(false);
-    }
-  );
 
   if (!conversationId) {
     return (
@@ -60,7 +36,7 @@ const ChatMessages = () => {
       ) : (
         messages
           .filter((m: Message) => m.content.role !== "system")
-          .filter((m: Message) => normalizeMessageText(m).trim() !== "")
+          .filter((m: Message) => m.content.content.trim() !== "")
           .map((message: Message, index: number) => (
             <div
               key={message.message_id || index}
@@ -83,7 +59,7 @@ const ChatMessages = () => {
                     : "bg-muted"
                 }`}
               >
-                <p>{normalizeMessageText(message)}</p>
+                <p>{message.content.content}</p>
               </div>
               
               {message.content.role === "user" && (

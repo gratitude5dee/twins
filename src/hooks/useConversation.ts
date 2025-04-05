@@ -1,5 +1,4 @@
 
-import { getConversation } from "@/lib/conversations";
 import { useQuery } from "@tanstack/react-query";
 
 export const useConversation = (conversationId: string) => {
@@ -7,12 +6,13 @@ export const useConversation = (conversationId: string) => {
     queryKey: ["conversation", conversationId],
     queryFn: async () => {
       if (!conversationId) return null;
-      // This is a placeholder - in a real application, you would call your API
-      // to fetch conversation details
-      return { 
+      
+      // This is a placeholder implementation
+      // In a real app, you would fetch this from your API
+      return {
         conversation_id: conversationId,
         title: "Conversation",
-        messages: [] 
+        messages: []
       };
     },
     enabled: !!conversationId,
