@@ -1,0 +1,224 @@
+
+import asyncio
+from typing import Any, AsyncGenerator, List, Tuple
+
+from bots.http.frame_serializer import BotFrameSerializer
+from bots.persistent_context import PersistentContext
+from bots.rtvi import create_rtvi_processor
+from bots.types import BotConfig, BotParams
+from common.config import SERVICE_API_KEYS, DEFAULT_LLM_CONTEXT
+from common.models import Attachment, Message, Conversation
+from fastapi import HTTPException, status
+from loguru import logger
+from openai._types import NOT_GIVEN
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from pipecat.pipeline.pipeline import Pipeline
+from pipecat.pipeline.runner import PipelineRunner
+from pipecat.pipeline.task import PipelineTask
+from pipecat.processors.async_generator import AsyncGeneratorProcessor
+from pipecat.processors.frameworks.rtvi import (
+    RTVIActionRun,
+    RTVIBotLLMProcessor,
+    RTVIMessage,
+    RTVIProcessor,
+)
+from pipecat.services.ai_services import OpenAILLMContext
+from pipecat.services.google import GoogleLLMContext, GoogleLLMService
+
+
+async def http_bot_pipeline(
+    params: BotParams,
+    config: BotConfig,
+    messages,
+    attachments: List[Attachment],
+    db: AsyncSession,
+    language_code: str = "english",
+) -> Tuple[AsyncGenerator[Any, None], Any]:
+    llm_api_key = SERVICE_API_KEYS.get("gemini")
+    if llm_api_key is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Service `llm` not available in SERVICE_API_KEYS. Please check your environment variables.",
+        )
+
+    # Fetch the twin's personality data
+    twin_data = None
+    try:
+        # First, get the conversation to find the twin_id
+        conversation_query = select(Conversation).where(Conversation.id == params.conversation_id)
+        conversation_result = await db.execute(conversation_query)
+        conversation = conversation_result.scalars().first()
+        
+        if conversation:
+            # Now fetch the twin data from digital_twins table
+            from sqlalchemy import Table, MetaData, select
+            metadata = MetaData()
+            digital_twins = Table('digital_twins', metadata, autoload_with=db.get_bind())
+            
+            twin_query = select(digital_twins).where(digital_twins.c.id == conversation.twin_id)
+            twin_result = await db.execute(twin_query)
+            twin_data = twin_result.mappings().first()
+            
+            logger.info(f"Fetched twin data for {conversation.twin_id}: {twin_data.keys() if twin_data else 'None'}")
+    except Exception as e:
+        logger.error(f"Error fetching twin personality data: {e}")
+        twin_data = None
+
+    # Build the system prompt based on twin data
+    system_message = await build_system_prompt(twin_data)
+    
+    # Initialize with system message first if available
+    if system_message:
+        if not messages or (messages and messages[0]['content'].get('role') != "system"):
+            messages.insert(0, {"content": {"role": "system", "content": system_message}})
+    
+    llm = GoogleLLMService(
+        api_key=str(SERVICE_API_KEYS["gemini"]),
+        model="gemini-2.0-flash-exp",
+    )
+
+    tools = NOT_GIVEN
+    context = OpenAILLMContext(messages, tools)
+    context_aggregator = llm.create_context_aggregator(
+        context, assistant_expect_stripped_words=False
+    )
+    # Terrible hack. Fix this by making create_context_aggregator downcast the context
+    # automatically. But think through that code first to make sure there won't be
+    # any unintended consequences.
+    if isinstance(llm, GoogleLLMService):
+        GoogleLLMContext.upgrade_to_google(context)
+    user_aggregator = context_aggregator.user()
+    assistant_aggregator = context_aggregator.assistant()
+
+    storage = PersistentContext(context=context)
+
+    async_generator = AsyncGeneratorProcessor(serializer=BotFrameSerializer())
+
+    #
+    # RTVI
+    #
+
+    rtvi = await create_rtvi_processor(config, user_aggregator)
+
+    #
+    # Processing
+    #
+
+    # This will send `bot-llm-*` messages.
+    rtvi_bot_llm = RTVIBotLLMProcessor()
+
+    processors = [
+        rtvi,
+        user_aggregator,
+        storage.create_processor(),
+        llm,
+        rtvi_bot_llm,
+        async_generator,
+        assistant_aggregator,
+        storage.create_processor(exit_on_endframe=True),
+    ]
+
+    pipeline = Pipeline(processors)
+
+    runner = PipelineRunner(handle_sigint=False)
+
+    task = PipelineTask(pipeline)
+
+    runner_task = asyncio.create_task(runner.run(task))
+
+    @storage.on_context_message
+    async def on_context_message(messages: list[Any]):
+        logger.debug(f"{len(messages)} message(s) received for storage: {str(messages)[:120]}...")
+        try:
+            await Message.create_messages(
+                db_session=db,
+                conversation_id=params.conversation_id,
+                messages=messages,
+                language_code=language_code,
+            )
+        except Exception as e:
+            logger.error(f"Error storing messages: {e}")
+            raise e
+
+    @rtvi.event_handler("on_bot_started")
+    async def on_bot_started(rtvi: RTVIProcessor):
+        for action in params.actions:
+            logger.debug(f"Processing action: {action}")
+
+            # If this is an append_to_messages action, we need to append any
+            # attachments. The rule we'll follow is that we should append
+            # attachments to the first "user" message in the actions list.
+            if action.data.get("action") == "append_to_messages" and attachments:
+                for msg in action.data["arguments"][0]["value"]:
+                    if msg.get("role") == "user":
+                        # Append attachments to this message
+                        logger.debug(
+                            f"Appending {len(attachments)} attachment(s) to 'user' message"
+                        )
+                        content = msg.get("content", "")
+                        if isinstance(content, str):
+                            content = [{"type": "text", "text": content}]
+                        for attachment in attachments:
+                            # Assume for the moment that all attachments are images
+                            content.append(
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:{attachment.file_type};base64,{attachment.file_data}"
+                                    },
+                                }
+                            )
+                            await db.delete(attachment)
+                            await db.commit()
+                        break
+
+            await rtvi.handle_message(action)
+
+        # This is a single turn, so we just push an action to stop the running
+        # pipeline task.
+        action = RTVIActionRun(service="system", action="end")
+        message = RTVIMessage(type="action", id="END", data=action.model_dump())
+        await rtvi.handle_message(message)
+
+    return (async_generator.generator(), runner_task)
+
+
+async def build_system_prompt(twin_data):
+    """Builds a system prompt based on twin personality data"""
+    if not twin_data:
+        # Fallback to default prompt if no twin data is available
+        return DEFAULT_LLM_CONTEXT[0]['content']['content']
+    
+    try:
+        name = twin_data.get('name', 'WZRD')
+        description = twin_data.get('description', '')
+        
+        # Extract personality data from features and model_data
+        features = twin_data.get('features', {}) or {}
+        model_data = twin_data.get('model_data', {}) or {}
+        
+        bio = features.get('bio', '') if features else ''
+        lore = features.get('lore', '') if features else ''
+        knowledge = features.get('knowledge', '') if features else ''
+        
+        # Construct the system prompt with the personality data
+        system_prompt = f"""You are {name}, a digital twin with the following traits:
+
+Description: {description}
+
+Bio: {bio}
+
+Lore: {lore}
+
+Knowledge: {knowledge}
+
+Always stay in character as {name} during this conversation. Keep your responses brief when possible. Avoid bold and italic text formatting in your responses. You may reference your background knowledge when answering questions."""
+
+        logger.debug(f"Generated system prompt for {name}: {system_prompt[:100]}...")
+        return system_prompt
+        
+    except Exception as e:
+        logger.error(f"Error building system prompt from twin data: {e}")
+        return DEFAULT_LLM_CONTEXT[0]['content']['content']
