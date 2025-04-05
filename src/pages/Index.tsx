@@ -5,20 +5,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, 
 import { Brain, Bot, Code, Sparkles, ArrowRight, Bot as BotIcon, Workflow, MessageSquare, Database } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useMousePosition } from '@/hooks/use-mouse-position';
-
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const mousePosition = useMousePosition(heroRef);
-  
+
   // Calculate parallax effect for hero elements
   const calculateParallax = (depth: number = 1) => {
     const x = (mousePosition.elementX - 0.5) * depth * -20;
     const y = (mousePosition.elementY - 0.5) * depth * -20;
     return `translate(${x}px, ${y}px)`;
   };
-
-  return (
-    <Layout>
+  return <Layout>
       {/* Hero Section with Mouse Parallax */}
       <section ref={heroRef} className="py-16 md:py-24 relative overflow-hidden">
         <div className="container px-4 md:px-6">
@@ -28,7 +25,7 @@ const Index = () => {
                 introducing agency
               </div>
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                Create <span className="gradient-text">AI Agents</span> Tailored to Your Needs
+                Create <span className="gradient-text">Knowledge Workers</span> Tailored to Your Needs
               </h1>
               <p className="text-lg text-muted-foreground max-w-[600px]">
                 Leverage the power of artificial intelligence to build custom AI agents that help with research, content creation, data analysis, and more.
@@ -49,17 +46,15 @@ const Index = () => {
               </div>
             </div>
             <div className="flex justify-center lg:justify-end">
-              <div 
-                className="relative w-full max-w-[500px] h-[400px] bg-muted rounded-lg overflow-hidden glass"
-                style={{ transform: calculateParallax(0.5) }}
-              >
+              <div className="relative w-full max-w-[500px] h-[400px] bg-muted rounded-lg overflow-hidden glass" style={{
+              transform: calculateParallax(0.5)
+            }}>
                 <div className="absolute inset-0 gradient-bg opacity-20 animate-pulse-slow"></div>
                 
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <GlassCard 
-                    className="p-8 max-w-[400px] transition-all duration-500 hover:shadow-glow-blue"
-                    style={{ transform: calculateParallax(1.2) }}
-                  >
+                  <GlassCard className="p-8 max-w-[400px] transition-all duration-500 hover:shadow-glow-blue" style={{
+                  transform: calculateParallax(1.2)
+                }}>
                     <div className="flex items-center gap-3 mb-4">
                       <div className="h-10 w-10 rounded-full gradient-bg flex items-center justify-center animate-float">
                         <BotIcon className="h-5 w-5 text-white" />
@@ -96,8 +91,7 @@ const Index = () => {
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Feature Cards */}
-            {featureCards.map((feature, index) => (
-              <Card key={index} className="bg-card-gradient overflow-hidden group">
+            {featureCards.map((feature, index) => <Card key={index} className="bg-card-gradient overflow-hidden group">
                 <CardHeader>
                   <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:scale-110 transition-transform">
                     {feature.icon}
@@ -108,8 +102,7 @@ const Index = () => {
                 <CardContent>
                   <p className="text-sm text-muted-foreground">{feature.content}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -135,7 +128,9 @@ const Index = () => {
               <div className="hidden lg:flex justify-end">
                 <div className="relative">
                   <div className="absolute -left-6 -top-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm animate-float"></div>
-                  <div className="absolute -right-8 -bottom-8 w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm animate-float" style={{animationDelay: '1s'}}></div>
+                  <div className="absolute -right-8 -bottom-8 w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm animate-float" style={{
+                  animationDelay: '1s'
+                }}></div>
                   <div className="w-64 h-64 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center animate-tilt">
                     <Bot className="h-24 w-24 text-white" />
                   </div>
@@ -145,48 +140,39 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
 
 // Feature card data
-const featureCards = [
-  {
-    icon: <Bot className="h-6 w-6" />,
-    title: "Custom AI Agents",
-    description: "Create AI agents tailored to your specific needs and use cases.",
-    content: "Build specialized AI assistants for research, content creation, customer support, and more."
-  },
-  {
-    icon: <Brain className="h-6 w-6" />,
-    title: "Advanced Instructions",
-    description: "Configure detailed instructions to guide your agent's behavior.",
-    content: "Define personality, knowledge domains, response style, and conversation flow."
-  },
-  {
-    icon: <Workflow className="h-6 w-6" />,
-    title: "Agent Templates",
-    description: "Start with pre-built templates for common use cases.",
-    content: "Choose from a variety of templates and customize them to your specific requirements."
-  },
-  {
-    icon: <MessageSquare className="h-6 w-6" />,
-    title: "Conversational Interface",
-    description: "Engage with your agents through a natural chat interface.",
-    content: "Interact with your AI agents using natural language in a user-friendly chat environment."
-  },
-  {
-    icon: <Database className="h-6 w-6" />,
-    title: "Knowledge Management",
-    description: "Upload documents and data to enhance your agent's knowledge.",
-    content: "Give your agents access to your proprietary data, documentation, and knowledge base."
-  },
-  {
-    icon: <Code className="h-6 w-6" />,
-    title: "API Integration",
-    description: "Connect your agents to external services and data sources.",
-    content: "Integrate with APIs to access real-time data and perform actions in other systems."
-  }
-];
-
+const featureCards = [{
+  icon: <Bot className="h-6 w-6" />,
+  title: "Custom AI Agents",
+  description: "Create AI agents tailored to your specific needs and use cases.",
+  content: "Build specialized AI assistants for research, content creation, customer support, and more."
+}, {
+  icon: <Brain className="h-6 w-6" />,
+  title: "Advanced Instructions",
+  description: "Configure detailed instructions to guide your agent's behavior.",
+  content: "Define personality, knowledge domains, response style, and conversation flow."
+}, {
+  icon: <Workflow className="h-6 w-6" />,
+  title: "Agent Templates",
+  description: "Start with pre-built templates for common use cases.",
+  content: "Choose from a variety of templates and customize them to your specific requirements."
+}, {
+  icon: <MessageSquare className="h-6 w-6" />,
+  title: "Conversational Interface",
+  description: "Engage with your agents through a natural chat interface.",
+  content: "Interact with your AI agents using natural language in a user-friendly chat environment."
+}, {
+  icon: <Database className="h-6 w-6" />,
+  title: "Knowledge Management",
+  description: "Upload documents and data to enhance your agent's knowledge.",
+  content: "Give your agents access to your proprietary data, documentation, and knowledge base."
+}, {
+  icon: <Code className="h-6 w-6" />,
+  title: "API Integration",
+  description: "Connect your agents to external services and data sources.",
+  content: "Integrate with APIs to access real-time data and perform actions in other systems."
+}];
 export default Index;
