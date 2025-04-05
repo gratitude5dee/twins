@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
 type AuthContextType = {
   user: User | null;
@@ -24,6 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -31,6 +33,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_IN') {
+          // Use setTimeout to avoid potential deadlocks with Supabase auth
+          setTimeout(() => {
+            toast({
+              title: "Welcome back!",
+              description: "You have successfully signed in.",
+            });
+          }, 0);
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          // Use setTimeout to avoid potential deadlocks with Supabase auth
+          setTimeout(() => {
+            toast({
+              title: "Signed out",
+              description: "You have been signed out successfully.",
+            });
+          }, 0);
+        }
+        
         setLoading(false);
       }
     );
@@ -45,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   const signUp = async (email: string, password: string) => {
     return supabase.auth.signUp({
