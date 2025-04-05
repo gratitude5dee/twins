@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,7 +24,6 @@ import SecretsSection from '@/components/agent/SecretsSection';
 
 // Supabase URL for edge function calls
 const supabaseUrl = 'https://juvfuvamiszfyinyxlxw.supabase.co';
-
 const twinFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters."
@@ -38,40 +36,67 @@ const twinFormSchema = z.object({
   tags: z.string().optional(),
   categories: z.array(z.string()).default([])
 });
-
 type TwinFormValues = z.infer<typeof twinFormSchema>;
-
-const modelProviders = [
-  { value: "OpenAI", label: "OpenAI" },
-  { value: "Anthropic", label: "Anthropic" },
-  { value: "Google", label: "Google" },
-  { value: "Meta", label: "Meta" },
-  { value: "Mistral", label: "Mistral" }
-];
-
-const clientTypes = [
-  { value: "discord", label: "Discord" },
-  { value: "twitter", label: "X (Twitter)" },
-  { value: "slack", label: "Slack" },
-  { value: "telegram", label: "Telegram" },
-  { value: "web", label: "Web Interface" }
-];
-
-const pluginOptions = [
-  { value: "web-search", label: "Web Search" },
-  { value: "code-generation", label: "Code Generation" },
-  { value: "image-generation", label: "Image Generation" },
-  { value: "data-analysis", label: "Data Analysis" },
-  { value: "document-qa", label: "Document Q&A" }
-];
+const modelProviders = [{
+  value: "OpenAI",
+  label: "OpenAI"
+}, {
+  value: "Anthropic",
+  label: "Anthropic"
+}, {
+  value: "Google",
+  label: "Google"
+}, {
+  value: "Meta",
+  label: "Meta"
+}, {
+  value: "Mistral",
+  label: "Mistral"
+}];
+const clientTypes = [{
+  value: "discord",
+  label: "Discord"
+}, {
+  value: "twitter",
+  label: "X (Twitter)"
+}, {
+  value: "slack",
+  label: "Slack"
+}, {
+  value: "telegram",
+  label: "Telegram"
+}, {
+  value: "web",
+  label: "Web Interface"
+}];
+const pluginOptions = [{
+  value: "web-search",
+  label: "Web Search"
+}, {
+  value: "code-generation",
+  label: "Code Generation"
+}, {
+  value: "image-generation",
+  label: "Image Generation"
+}, {
+  value: "data-analysis",
+  label: "Data Analysis"
+}, {
+  value: "document-qa",
+  label: "Document Q&A"
+}];
 
 // Wizard step types
 type WizardStep = 'basic' | 'model' | 'personality' | 'integrations' | 'secrets' | 'confirmation';
-
 const CreateTwin = () => {
-  const { user, session } = useAuth();
+  const {
+    user,
+    session
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imagePath, setImagePath] = useState<string>('');
@@ -86,7 +111,6 @@ const CreateTwin = () => {
   const [activeTab, setActiveTab] = useState<WizardStep>("basic");
   const [viewMode, setViewMode] = useState<'wizard' | 'form'>('form');
   const [agentSecrets, setAgentSecrets] = useState<Record<string, string>>({});
-
   const form = useForm<TwinFormValues>({
     resolver: zodResolver(twinFormSchema),
     defaultValues: {
@@ -107,7 +131,10 @@ const CreateTwin = () => {
       setIsLoadingCategories(true);
       try {
         // Use a direct table query for categories
-        const { data, error } = await supabase.from('categories').select('id, name, description');
+        const {
+          data,
+          error
+        } = await supabase.from('categories').select('id, name, description');
         if (error) {
           console.error('Error fetching categories:', error);
           toast({
@@ -131,69 +158,56 @@ const CreateTwin = () => {
     };
     fetchCategories();
   }, [toast]);
-
   const handleImageUploaded = (url: string, path: string) => {
     setImageUrl(url);
     setImagePath(path);
   };
-
   const handleAddBioStatement = () => {
     if (newBioStatement.trim()) {
       setBioStatements([...bioStatements, newBioStatement.trim()]);
       setNewBioStatement('');
     }
   };
-
   const handleRemoveBioStatement = (index: number) => {
     setBioStatements(bioStatements.filter((_, i) => i !== index));
   };
-
   const handleAddLoreItem = () => {
     if (newLoreItem.trim()) {
       setLoreItems([...loreItems, newLoreItem.trim()]);
       setNewLoreItem('');
     }
   };
-
   const handleRemoveLoreItem = (index: number) => {
     setLoreItems(loreItems.filter((_, i) => i !== index));
   };
-
   const handleAddKnowledgeItem = () => {
     if (newKnowledgeItem.trim()) {
       setKnowledgeItems([...knowledgeItems, newKnowledgeItem.trim()]);
       setNewKnowledgeItem('');
     }
   };
-
   const handleRemoveKnowledgeItem = (index: number) => {
     setKnowledgeItems(knowledgeItems.filter((_, i) => i !== index));
   };
-
   const handleSecretsChange = (secrets: Record<string, string>) => {
     setAgentSecrets(secrets);
   };
-
   const handleNext = () => {
     // Define step order
     const steps: WizardStep[] = ['basic', 'model', 'personality', 'integrations', 'secrets', 'confirmation'];
     const currentIndex = steps.indexOf(activeTab);
-    
     if (currentIndex < steps.length - 1) {
       setActiveTab(steps[currentIndex + 1]);
     }
   };
-
   const handleBack = () => {
     // Define step order
     const steps: WizardStep[] = ['basic', 'model', 'personality', 'integrations', 'secrets', 'confirmation'];
     const currentIndex = steps.indexOf(activeTab);
-    
     if (currentIndex > 0) {
       setActiveTab(steps[currentIndex - 1]);
     }
   };
-
   const onSubmit = async (values: TwinFormValues) => {
     if (!user) {
       toast({
@@ -221,7 +235,10 @@ const CreateTwin = () => {
       };
 
       // Create the twin in the database
-      const { data: twin, error } = await supabase.from('digital_twins').insert([{
+      const {
+        data: twin,
+        error
+      } = await supabase.from('digital_twins').insert([{
         name: values.name,
         description: values.description || '',
         image_url: imageUrl,
@@ -236,7 +253,6 @@ const CreateTwin = () => {
         },
         model_data: modelData
       }]).select().single();
-
       if (error) {
         throw error;
       }
@@ -247,11 +263,9 @@ const CreateTwin = () => {
           twin_id: twin.id,
           category_id: categoryId
         }));
-        
-        const { error: categoryError } = await supabase
-          .from('twin_categories')
-          .insert(categoryAssociations);
-          
+        const {
+          error: categoryError
+        } = await supabase.from('twin_categories').insert(categoryAssociations);
         if (categoryError) {
           console.error('Error associating categories:', categoryError);
         }
@@ -272,7 +286,6 @@ const CreateTwin = () => {
               secrets: agentSecrets
             })
           });
-          
           if (!response.ok) {
             console.error('Error storing secrets:', await response.text());
             toast({
@@ -290,7 +303,6 @@ const CreateTwin = () => {
           });
         }
       }
-
       toast({
         title: "Agent created!",
         description: "Your AI agent has been created successfully."
@@ -310,9 +322,7 @@ const CreateTwin = () => {
               twinId: twin.id
             })
           });
-          
           const processingResult = await response.json();
-          
           if (!response.ok) {
             console.warn('Image processing request failed:', processingResult);
             toast({
@@ -347,17 +357,39 @@ const CreateTwin = () => {
   };
 
   // Templates for quick setup
-  const templates = [
-    { id: "eliza", name: "Eliza", description: "Classic therapeutic chatbot" },
-    { id: "trump", name: "Trump", description: "Former US President" },
-    { id: "c3po", name: "C-3PO", description: "Protocol droid from Star Wars" },
-    { id: "bd", name: "BD", description: "Business development assistant" },
-    { id: "dobby", name: "Dobby", description: "House elf from Harry Potter" },
-    { id: "social", name: "Social", description: "Social media manager" },
-    { id: "support", name: "Support", description: "Customer support agent" },
-    { id: "web3", name: "Web3", description: "Blockchain and crypto expert" }
-  ];
-
+  const templates = [{
+    id: "eliza",
+    name: "Eliza",
+    description: "Classic therapeutic chatbot"
+  }, {
+    id: "trump",
+    name: "Trump",
+    description: "Former US President"
+  }, {
+    id: "c3po",
+    name: "C-3PO",
+    description: "Protocol droid from Star Wars"
+  }, {
+    id: "bd",
+    name: "BD",
+    description: "Business development assistant"
+  }, {
+    id: "dobby",
+    name: "Dobby",
+    description: "House elf from Harry Potter"
+  }, {
+    id: "social",
+    name: "Social",
+    description: "Social media manager"
+  }, {
+    id: "support",
+    name: "Support",
+    description: "Customer support agent"
+  }, {
+    id: "web3",
+    name: "Web3",
+    description: "Blockchain and crypto expert"
+  }];
   const applyTemplate = (templateId: string) => {
     switch (templateId) {
       case "trump":
@@ -365,21 +397,9 @@ const CreateTwin = () => {
         form.setValue("description", "45th President of the United States");
         form.setValue("modelProvider", "OpenAI");
         form.setValue("clients", ["twitter"]);
-        setBioStatements([
-          "secured the Southern Border COMPLETELY (until they DESTROYED it)",
-          "protected WOMEN'S SPORTS (while Democrats let MEN compete)",
-          "ended INFLATION and made America AFFORDABLE (until Kamala ruined it)"
-        ]);
-        setLoreItems([
-          "Democrats using Secret Service assignments as election interference",
-          "they let Minneapolis burn in 2020 (then begged for help)",
-          "saved America from China Virus (while they did nothing)"
-        ]);
-        setKnowledgeItems([
-          "knows EXACT cost to families under Kamala ($29,000)",
-          "understands REAL border numbers (worse than reported)",
-          "saw what really happened in Minneapolis 2020"
-        ]);
+        setBioStatements(["secured the Southern Border COMPLETELY (until they DESTROYED it)", "protected WOMEN'S SPORTS (while Democrats let MEN compete)", "ended INFLATION and made America AFFORDABLE (until Kamala ruined it)"]);
+        setLoreItems(["Democrats using Secret Service assignments as election interference", "they let Minneapolis burn in 2020 (then begged for help)", "saved America from China Virus (while they did nothing)"]);
+        setKnowledgeItems(["knows EXACT cost to families under Kamala ($29,000)", "understands REAL border numbers (worse than reported)", "saw what really happened in Minneapolis 2020"]);
         break;
       // Other templates would go here
       default:
@@ -390,18 +410,15 @@ const CreateTwin = () => {
 
   // Determine if we're on the confirmation screen
   const isConfirmationStep = activeTab === 'confirmation';
-
   const renderConfirmationView = () => {
     const formValues = form.getValues();
-    
+
     // Format client names for display
     const getClientLabel = (clientValue: string) => {
       const client = clientTypes.find(c => c.value === clientValue);
       return client ? client.label : clientValue;
     };
-    
-    return (
-      <div className="space-y-8">
+    return <div className="space-y-8">
         <div className="bg-blue-100 p-6 rounded-lg mb-6">
           <h2 className="text-2xl font-bold text-center mb-2">Confirm agent details</h2>
           <p className="text-center">
@@ -432,13 +449,9 @@ const CreateTwin = () => {
                         <p className="text-gray-500">Avatar</p>
                         <div className="flex items-center">
                           <Avatar className="h-12 w-12 bg-green-100 border-2 border-green-400">
-                            {imageUrl ? (
-                              <AvatarImage src={imageUrl} alt="Avatar" />
-                            ) : (
-                              <AvatarFallback>
+                            {imageUrl ? <AvatarImage src={imageUrl} alt="Avatar" /> : <AvatarFallback>
                                 <span className="text-xl">😎</span>
-                              </AvatarFallback>
-                            )}
+                              </AvatarFallback>}
                           </Avatar>
                         </div>
                       </div>
@@ -451,20 +464,16 @@ const CreateTwin = () => {
                       <div>
                         <p className="text-gray-500">Clients</p>
                         <p className="font-medium">
-                          {formValues.clients.length > 0 
-                            ? formValues.clients.map(getClientLabel).join(", ") 
-                            : "None"}
+                          {formValues.clients.length > 0 ? formValues.clients.map(getClientLabel).join(", ") : "None"}
                         </p>
                       </div>
 
-                      {formValues.clients.includes("twitter") && (
-                        <div>
+                      {formValues.clients.includes("twitter") && <div>
                           <p className="text-gray-500">Social Links</p>
                           <p className="font-medium">
                             X (Twitter): <span className="text-blue-500">https://x.com/tdjt45</span>
                           </p>
-                        </div>
-                      )}
+                        </div>}
                     </div>
                   </div>
                 </div>
@@ -474,14 +483,14 @@ const CreateTwin = () => {
                 <div className="bg-gray-200 p-6 rounded-lg">
                   <pre className="text-xs overflow-auto">
                     {JSON.stringify({
-                      name: formValues.name,
-                      model: formValues.modelProvider,
-                      clients: formValues.clients,
-                      plugins: formValues.plugins,
-                      bio: bioStatements,
-                      lore: loreItems,
-                      knowledge: knowledgeItems
-                    }, null, 2)}
+                    name: formValues.name,
+                    model: formValues.modelProvider,
+                    clients: formValues.clients,
+                    plugins: formValues.plugins,
+                    bio: bioStatements,
+                    lore: loreItems,
+                    knowledge: knowledgeItems
+                  }, null, 2)}
                   </pre>
                 </div>
               </TabsContent>
@@ -489,19 +498,12 @@ const CreateTwin = () => {
           </div>
         </div>
         
-        <Button 
-          onClick={() => onSubmit(formValues)} 
-          disabled={isCreating}
-          className="w-full h-16 text-lg bg-yellow-400 hover:bg-yellow-500 text-black font-bold"
-        >
+        <Button onClick={() => onSubmit(formValues)} disabled={isCreating} className="w-full h-16 text-lg bg-yellow-400 hover:bg-yellow-500 text-black font-bold">
           {isCreating ? "Deploying agent..." : "Deploy agent"}
         </Button>
-      </div>
-    );
+      </div>;
   };
-
-  return (
-    <Layout>
+  return <Layout>
       <div className="container py-8">
         <div className="flex flex-col space-y-4 mb-8">
           <div className="flex items-center justify-center">
@@ -517,19 +519,11 @@ const CreateTwin = () => {
 
         <div className="flex justify-center mb-8">
           <div className="flex space-x-6">
-            <Button 
-              variant={viewMode === 'wizard' ? 'default' : 'outline'} 
-              className="flex items-center gap-2"
-              onClick={() => setViewMode('wizard')}
-            >
+            <Button variant={viewMode === 'wizard' ? 'default' : 'outline'} className="flex items-center gap-2" onClick={() => setViewMode('wizard')}>
               <Settings className="h-4 w-4" />
               Step-by-Step Wizard
             </Button>
-            <Button 
-              variant={viewMode === 'form' ? 'default' : 'outline'} 
-              className="flex items-center gap-2"
-              onClick={() => setViewMode('form')}
-            >
+            <Button variant={viewMode === 'form' ? 'default' : 'outline'} className="flex items-center gap-2" onClick={() => setViewMode('form')}>
               <Settings className="h-4 w-4" />
               Detailed Form
             </Button>
@@ -537,7 +531,7 @@ const CreateTwin = () => {
         </div>
 
         <div className="flex justify-center mb-8">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as WizardStep)} className="w-full max-w-4xl">
+          <Tabs value={activeTab} onValueChange={value => setActiveTab(value as WizardStep)} className="w-full max-w-4xl">
             {/* New modern horizontal menu with icons and tooltips */}
             <div className="flex justify-center mb-6">
               <div className="bg-muted/20 rounded-full p-1.5 inline-flex">
@@ -615,51 +609,7 @@ const CreateTwin = () => {
               {/* Left sidebar - Table of Contents */}
               <div className="lg:col-span-1">
                 <Card>
-                  <CardContent className="pt-6">
-                    <h2 className="text-lg font-semibold mb-4">Table of Contents</h2>
-                    <div className="space-y-1">
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-name')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Name
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-avatar')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Avatar
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-model')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Model provider
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-clients')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Clients
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-plugins')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Plugins
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-bio')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Bio
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-lore')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Lore
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-knowledge')?.scrollIntoView({
-                      behavior: 'smooth'
-                    })}>
-                        Knowledge
-                      </Button>
-                    </div>
-                  </CardContent>
+                  
                 </Card>
               </div>
 
@@ -667,10 +617,7 @@ const CreateTwin = () => {
               <div className="lg:col-span-3">
                 <Card>
                   <CardContent className="pt-6">
-                    {isConfirmationStep ? (
-                      renderConfirmationView()
-                    ) : (
-                      <>
+                    {isConfirmationStep ? renderConfirmationView() : <>
                         <h2 className="text-2xl font-bold mb-6">Start with a template</h2>
                         <p className="mb-6">
                           Using the inputs below, craft a unique and engaging personality for your AI agent. 
@@ -682,15 +629,9 @@ const CreateTwin = () => {
                           <p className="mb-4">Use one of the options below to prefill the fields.</p>
                           
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {templates.map(template => (
-                              <button 
-                                key={template.id} 
-                                className={`p-3 rounded-md hover:bg-secondary/80 transition-colors ${template.id === 'trump' ? 'bg-primary/20' : 'bg-secondary/50'}`}
-                                onClick={() => applyTemplate(template.id)}
-                              >
+                            {templates.map(template => <button key={template.id} className={`p-3 rounded-md hover:bg-secondary/80 transition-colors ${template.id === 'trump' ? 'bg-primary/20' : 'bg-secondary/50'}`} onClick={() => applyTemplate(template.id)}>
                                 {template.name}
-                              </button>
-                            ))}
+                              </button>)}
                           </div>
                         </div>
 
@@ -702,14 +643,14 @@ const CreateTwin = () => {
                                 <h2 className="text-2xl font-bold mb-2">Name</h2>
                                 <p className="text-muted-foreground mb-4">The character's display name for identification and in conversations</p>
                                 
-                                <FormField control={form.control} name="name" render={({ field }) => (
-                                  <FormItem>
+                                <FormField control={form.control} name="name" render={({
+                              field
+                            }) => <FormItem>
                                     <FormControl>
                                       <Input placeholder="Enter agent name" {...field} />
                                     </FormControl>
                                     <FormMessage />
-                                  </FormItem>
-                                )} />
+                                  </FormItem>} />
                               </div>
 
                               {/* Avatar section */}
@@ -722,14 +663,10 @@ const CreateTwin = () => {
                                     <SheetTrigger asChild>
                                       <div className="cursor-pointer relative inline-block">
                                         <Avatar className="h-32 w-32">
-                                          {imageUrl ? (
-                                            <AvatarImage src={imageUrl} alt="Avatar" />
-                                          ) : (
-                                            <AvatarFallback className="flex flex-col items-center justify-center bg-secondary">
+                                          {imageUrl ? <AvatarImage src={imageUrl} alt="Avatar" /> : <AvatarFallback className="flex flex-col items-center justify-center bg-secondary">
                                               <ImagePlus className="h-10 w-10 text-muted-foreground" />
                                               <span className="text-xs text-muted-foreground mt-1">Click to upload</span>
-                                            </AvatarFallback>
-                                          )}
+                                            </AvatarFallback>}
                                         </Avatar>
                                       </div>
                                     </SheetTrigger>
@@ -757,8 +694,9 @@ const CreateTwin = () => {
                                 <h2 className="text-2xl font-bold mb-2">Model provider</h2>
                                 <p className="text-muted-foreground mb-4">The AI model provider, such as OpenAI or Anthropic</p>
                                 
-                                <FormField control={form.control} name="modelProvider" render={({ field }) => (
-                                  <FormItem>
+                                <FormField control={form.control} name="modelProvider" render={({
+                              field
+                            }) => <FormItem>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                       <FormControl>
                                         <SelectTrigger>
@@ -766,16 +704,13 @@ const CreateTwin = () => {
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        {modelProviders.map(provider => (
-                                          <SelectItem key={provider.value} value={provider.value}>
+                                        {modelProviders.map(provider => <SelectItem key={provider.value} value={provider.value}>
                                             {provider.label}
-                                          </SelectItem>
-                                        ))}
+                                          </SelectItem>)}
                                       </SelectContent>
                                     </Select>
                                     <FormMessage />
-                                  </FormItem>
-                                )} />
+                                  </FormItem>} />
                               </div>
                             </TabsContent>
 
@@ -786,28 +721,17 @@ const CreateTwin = () => {
                                 <p className="text-muted-foreground mb-4">Background information for your character. Includes biographical details about the character, either as one complete biography or several statements that vary.</p>
                                 
                                 <div className="space-y-3 mb-4">
-                                  {bioStatements.map((statement, index) => (
-                                    <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
+                                  {bioStatements.map((statement, index) => <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
                                       <p className="flex-grow">{statement}</p>
                                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveBioStatement(index)}>
                                         <X className="h-4 w-4" />
                                       </Button>
-                                    </div>
-                                  ))}
+                                    </div>)}
                                 </div>
                                 
                                 <div className="flex gap-2">
-                                  <Input 
-                                    value={newBioStatement} 
-                                    onChange={e => setNewBioStatement(e.target.value)} 
-                                    placeholder="Add new bio statement..." 
-                                    className="flex-grow" 
-                                  />
-                                  <Button 
-                                    type="button" 
-                                    onClick={handleAddBioStatement} 
-                                    disabled={!newBioStatement.trim()}
-                                  >
+                                  <Input value={newBioStatement} onChange={e => setNewBioStatement(e.target.value)} placeholder="Add new bio statement..." className="flex-grow" />
+                                  <Button type="button" onClick={handleAddBioStatement} disabled={!newBioStatement.trim()}>
                                     <Plus className="h-4 w-4 mr-1" /> Add
                                   </Button>
                                 </div>
@@ -819,28 +743,17 @@ const CreateTwin = () => {
                                 <p className="text-muted-foreground mb-4">Backstory elements and unique character traits. These help define personality and can be randomly sampled in conversations.</p>
                                 
                                 <div className="space-y-3 mb-4">
-                                  {loreItems.map((item, index) => (
-                                    <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
+                                  {loreItems.map((item, index) => <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
                                       <p className="flex-grow">{item}</p>
                                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveLoreItem(index)}>
                                         <X className="h-4 w-4" />
                                       </Button>
-                                    </div>
-                                  ))}
+                                    </div>)}
                                 </div>
                                 
                                 <div className="flex gap-2">
-                                  <Input 
-                                    value={newLoreItem} 
-                                    onChange={e => setNewLoreItem(e.target.value)} 
-                                    placeholder="Add new lore..." 
-                                    className="flex-grow" 
-                                  />
-                                  <Button 
-                                    type="button" 
-                                    onClick={handleAddLoreItem} 
-                                    disabled={!newLoreItem.trim()}
-                                  >
+                                  <Input value={newLoreItem} onChange={e => setNewLoreItem(e.target.value)} placeholder="Add new lore..." className="flex-grow" />
+                                  <Button type="button" onClick={handleAddLoreItem} disabled={!newLoreItem.trim()}>
                                     <Plus className="h-4 w-4 mr-1" /> Add
                                   </Button>
                                 </div>
@@ -852,28 +765,17 @@ const CreateTwin = () => {
                                 <p className="text-muted-foreground mb-4">Facts or references to ground the character's responses</p>
                                 
                                 <div className="space-y-3 mb-4">
-                                  {knowledgeItems.map((item, index) => (
-                                    <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
+                                  {knowledgeItems.map((item, index) => <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
                                       <p className="flex-grow">{item}</p>
                                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveKnowledgeItem(index)}>
                                         <X className="h-4 w-4" />
                                       </Button>
-                                    </div>
-                                  ))}
+                                    </div>)}
                                 </div>
                                 
                                 <div className="flex gap-2">
-                                  <Input 
-                                    value={newKnowledgeItem} 
-                                    onChange={e => setNewKnowledgeItem(e.target.value)} 
-                                    placeholder="Add new knowledge..." 
-                                    className="flex-grow" 
-                                  />
-                                  <Button 
-                                    type="button" 
-                                    onClick={handleAddKnowledgeItem} 
-                                    disabled={!newKnowledgeItem.trim()}
-                                  >
+                                  <Input value={newKnowledgeItem} onChange={e => setNewKnowledgeItem(e.target.value)} placeholder="Add new knowledge..." className="flex-grow" />
+                                  <Button type="button" onClick={handleAddKnowledgeItem} disabled={!newKnowledgeItem.trim()}>
                                     <Plus className="h-4 w-4 mr-1" /> Add
                                   </Button>
                                 </div>
@@ -886,39 +788,25 @@ const CreateTwin = () => {
                                 <h2 className="text-2xl font-bold mb-2">Clients</h2>
                                 <p className="text-muted-foreground mb-4">Supported client types, such as Discord or X</p>
                                 
-                                <FormField control={form.control} name="clients" render={() => (
-                                  <FormItem>
+                                <FormField control={form.control} name="clients" render={() => <FormItem>
                                     <div className="space-y-4">
-                                      {clientTypes.map(client => (
-                                        <FormField 
-                                          key={client.value} 
-                                          control={form.control} 
-                                          name="clients" 
-                                          render={({ field }) => {
-                                            return (
-                                              <FormItem key={client.value} className="flex flex-row items-center space-x-3 space-y-0">
+                                      {clientTypes.map(client => <FormField key={client.value} control={form.control} name="clients" render={({
+                                  field
+                                }) => {
+                                  return <FormItem key={client.value} className="flex flex-row items-center space-x-3 space-y-0">
                                                 <FormControl>
-                                                  <Checkbox 
-                                                    checked={field.value?.includes(client.value)} 
-                                                    onCheckedChange={(checked) => {
-                                                      return checked
-                                                        ? field.onChange([...field.value, client.value])
-                                                        : field.onChange(field.value?.filter(value => value !== client.value))
-                                                    }} 
-                                                  />
+                                                  <Checkbox checked={field.value?.includes(client.value)} onCheckedChange={checked => {
+                                        return checked ? field.onChange([...field.value, client.value]) : field.onChange(field.value?.filter(value => value !== client.value));
+                                      }} />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
                                                   {client.label}
                                                 </FormLabel>
-                                              </FormItem>
-                                            )
-                                          }} 
-                                        />
-                                      ))}
+                                              </FormItem>;
+                                }} />)}
                                     </div>
                                     <FormMessage />
-                                  </FormItem>
-                                )} />
+                                  </FormItem>} />
                               </div>
 
                               {/* Plugins section */}
@@ -926,28 +814,18 @@ const CreateTwin = () => {
                                 <h2 className="text-2xl font-bold mb-2">Plugins <span className="text-muted-foreground font-normal text-sm">Optional</span></h2>
                                 <p className="text-muted-foreground mb-4">Plugins extend your agent's core functionality with additional features</p>
                                 
-                                <FormField control={form.control} name="plugins" render={() => (
-                                  <FormItem>
+                                <FormField control={form.control} name="plugins" render={() => <FormItem>
                                     <div className="space-y-4">
                                       <p className="text-sm font-medium">Select one or multiple plugins</p>
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {pluginOptions.map(plugin => (
-                                          <FormField 
-                                            key={plugin.value} 
-                                            control={form.control} 
-                                            name="plugins" 
-                                            render={({ field }) => {
-                                              return (
-                                                <FormItem key={plugin.value} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                        {pluginOptions.map(plugin => <FormField key={plugin.value} control={form.control} name="plugins" render={({
+                                    field
+                                  }) => {
+                                    return <FormItem key={plugin.value} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                                   <FormControl>
-                                                    <Checkbox 
-                                                      checked={field.value?.includes(plugin.value)} 
-                                                      onCheckedChange={(checked) => {
-                                                        return checked
-                                                          ? field.onChange([...field.value, plugin.value])
-                                                          : field.onChange(field.value?.filter(value => value !== plugin.value))
-                                                      }} 
-                                                    />
+                                                    <Checkbox checked={field.value?.includes(plugin.value)} onCheckedChange={checked => {
+                                          return checked ? field.onChange([...field.value, plugin.value]) : field.onChange(field.value?.filter(value => value !== plugin.value));
+                                        }} />
                                                   </FormControl>
                                                   <div className="space-y-1 leading-none">
                                                     <FormLabel className="font-medium">
@@ -957,16 +835,12 @@ const CreateTwin = () => {
                                                       Enable {plugin.label.toLowerCase()} capabilities
                                                     </p>
                                                   </div>
-                                                </FormItem>
-                                              )
-                                            }} 
-                                          />
-                                        ))}
+                                                </FormItem>;
+                                  }} />)}
                                       </div>
                                     </div>
                                     <FormMessage />
-                                  </FormItem>
-                                )} />
+                                  </FormItem>} />
                               </div>
                             </TabsContent>
 
@@ -980,79 +854,50 @@ const CreateTwin = () => {
                             </TabsContent>
 
                             {/* Categories section */}
-                            {categories.length > 0 && (
-                              <div className="border-t pt-6">
+                            {categories.length > 0 && <div className="border-t pt-6">
                                 <h2 className="text-xl font-bold mb-2">Categories</h2>
                                 <p className="text-muted-foreground mb-4">Assign your agent to one or more categories</p>
                                 
-                                <FormField control={form.control} name="categories" render={() => (
-                                  <FormItem>
+                                <FormField control={form.control} name="categories" render={() => <FormItem>
                                     <div className="grid grid-cols-2 gap-4">
-                                      {categories.map(category => (
-                                        <FormField 
-                                          key={category.id} 
-                                          control={form.control} 
-                                          name="categories" 
-                                          render={({ field }) => {
-                                            return (
-                                              <FormItem key={category.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                      {categories.map(category => <FormField key={category.id} control={form.control} name="categories" render={({
+                                field
+                              }) => {
+                                return <FormItem key={category.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                                 <FormControl>
-                                                  <Checkbox 
-                                                    checked={field.value?.includes(category.id)} 
-                                                    onCheckedChange={(checked) => {
-                                                      return checked
-                                                        ? field.onChange([...field.value, category.id])
-                                                        : field.onChange(field.value?.filter(value => value !== category.id))
-                                                    }} 
-                                                  />
+                                                  <Checkbox checked={field.value?.includes(category.id)} onCheckedChange={checked => {
+                                      return checked ? field.onChange([...field.value, category.id]) : field.onChange(field.value?.filter(value => value !== category.id));
+                                    }} />
                                                 </FormControl>
                                                 <div className="space-y-1 leading-none">
                                                   <FormLabel className="font-medium">
                                                     {category.name}
                                                   </FormLabel>
-                                                  {category.description && (
-                                                    <FormDescription>
+                                                  {category.description && <FormDescription>
                                                       {category.description}
-                                                    </FormDescription>
-                                                  )}
+                                                    </FormDescription>}
                                                 </div>
-                                              </FormItem>
-                                            )
-                                          }} 
-                                        />
-                                      ))}
+                                              </FormItem>;
+                              }} />)}
                                     </div>
                                     <FormMessage />
-                                  </FormItem>
-                                )} />
-                              </div>
-                            )}
+                                  </FormItem>} />
+                              </div>}
 
                             <div className="flex justify-between space-x-4 pt-6 border-t">
                               <Button type="button" variant="outline" onClick={handleBack} disabled={activeTab === 'basic'}>
                                 Back
                               </Button>
                               
-                              {activeTab !== 'confirmation' ? (
-                                <Button type="button" onClick={handleNext} variant="default">
-                                  Next: {
-                                    activeTab === 'basic' ? 'Model' :
-                                    activeTab === 'model' ? 'Personality' :
-                                    activeTab === 'personality' ? 'Integrations' :
-                                    activeTab === 'integrations' ? 'Secrets' :
-                                    'Confirmation'
-                                  }
-                                </Button>
-                              ) : (
-                                <Button type="submit" disabled={isCreating} className="gradient-bg">
+                              {activeTab !== 'confirmation' ? <Button type="button" onClick={handleNext} variant="default">
+                                  Next: {activeTab === 'basic' ? 'Model' : activeTab === 'model' ? 'Personality' : activeTab === 'personality' ? 'Integrations' : activeTab === 'integrations' ? 'Secrets' : 'Confirmation'}
+                                </Button> : <Button type="submit" disabled={isCreating} className="gradient-bg">
                                   {isCreating ? "Creating..." : "Create AI Agent"}
-                                </Button>
-                              )}
+                                </Button>}
                             </div>
                           </form>
                         </Form>
-                      </>
-                    )}
+                      </>}
                   </CardContent>
                 </Card>
               </div>
@@ -1060,8 +905,6 @@ const CreateTwin = () => {
           </Tabs>
         </div>
       </div>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default CreateTwin;
