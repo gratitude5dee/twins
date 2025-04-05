@@ -13,6 +13,7 @@ import { Bot, Brain, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Layout from '@/components/Layout';
 import AgentCard from '@/components/AgentCard';
+import AgentIcon from '@/components/AgentIcon';
 import { v4 as uuidv4 } from 'uuid';
 
 const formSchema = z.object({
