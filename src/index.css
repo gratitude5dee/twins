@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --sidebar-width: 320px;
+}
+
 @layer base {
   :root {
     --background: 225 30% 96%;
