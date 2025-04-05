@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,11 +13,19 @@ import Layout from '@/components/Layout';
 import TwinImageUpload from '@/components/TwinImageUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Checkbox } from '@/components/ui/checkbox';
 import { v4 as uuidv4 } from 'uuid';
 import { Bot } from 'lucide-react';
 
 // Supabase URL for edge function calls
 const supabaseUrl = 'https://juvfuvamiszfyinyxlxw.supabase.co';
+
+// Type definition for categories
+type Category = {
+  id: string;
+  name: string;
+  description: string | null;
+};
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -25,6 +33,7 @@ const formSchema = z.object({
   }),
   description: z.string().optional(),
   tags: z.string().optional(),
+  categories: z.array(z.string()).default([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -36,6 +45,8 @@ const CreateTwin = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imagePath, setImagePath] = useState<string>('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -43,8 +54,33 @@ const CreateTwin = () => {
       name: "",
       description: "",
       tags: "",
+      categories: [],
     },
   });
+
+  // Fetch available categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, description');
+        
+      if (error) {
+        console.error('Error fetching categories:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load categories",
+          variant: "destructive",
+        });
+      } else if (data) {
+        setCategories(data);
+      }
+      setIsLoadingCategories(false);
+    };
+
+    fetchCategories();
+  }, [toast]);
 
   const handleImageUploaded = (url: string, path: string) => {
     setImageUrl(url);
@@ -88,6 +124,27 @@ const CreateTwin = () => {
 
       if (error) {
         throw error;
+      }
+
+      // Insert category associations if categories were selected
+      if (values.categories.length > 0) {
+        const categoryInserts = values.categories.map(categoryId => ({
+          twin_id: twin.id,
+          category_id: categoryId
+        }));
+
+        const { error: categoryError } = await supabase
+          .from('twin_categories')
+          .insert(categoryInserts);
+
+        if (categoryError) {
+          console.error('Error associating categories:', categoryError);
+          toast({
+            title: "Warning",
+            description: "Twin created, but there was an issue associating categories.",
+            variant: "destructive",
+          });
+        }
       }
 
       toast({
@@ -221,6 +278,66 @@ const CreateTwin = () => {
               )}
             />
 
+            {categories.length > 0 && (
+              <FormField
+                control={form.control}
+                name="categories"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-base">Categories</FormLabel>
+                      <FormDescription>
+                        Select categories for your digital twin.
+                      </FormDescription>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {categories.map((category) => (
+                        <FormField
+                          key={category.id}
+                          control={form.control}
+                          name="categories"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={category.id}
+                                className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(category.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, category.id])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== category.id
+                                            )
+                                          )
+                                    }}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel className="font-normal">
+                                    {category.name}
+                                  </FormLabel>
+                                  {category.description && (
+                                    <FormDescription>
+                                      {category.description}
+                                    </FormDescription>
+                                  )}
+                                </div>
+                              </FormItem>
+                            )
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <div className="flex justify-end space-x-4">
               <Button 
                 type="button" 
@@ -232,7 +349,7 @@ const CreateTwin = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isCreating} 
+                disabled={isCreating || isLoadingCategories} 
                 className="gradient-bg"
               >
                 {isCreating ? "Creating..." : "Create Digital Twin"}

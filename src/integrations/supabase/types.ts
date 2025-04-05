@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -185,12 +206,58 @@ export type Database = {
           },
         ]
       }
+      twin_categories: {
+        Row: {
+          category_id: string
+          twin_id: string
+        }
+        Insert: {
+          category_id: string
+          twin_id: string
+        }
+        Update: {
+          category_id?: string
+          twin_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "twin_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "twin_categories_twin_id_fkey"
+            columns: ["twin_id"]
+            isOneToOne: false
+            referencedRelation: "digital_twins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_categories_by_ids: {
+        Args: {
+          category_ids_param: string[]
+        }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
+      get_twin_categories: {
+        Args: {
+          twin_id_param: string
+        }
+        Returns: {
+          category_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

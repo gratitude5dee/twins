@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +22,10 @@ type TwinDetail = {
   features: Record<string, any> | null;
   model_data: Record<string, any> | null;
   processing_status: string | null;
+  owner_id: string;
+  updated_at: string;
+  parent_id: string | null;
+  related_twin_ids: string[] | null;
 };
 
 type Category = {
@@ -65,26 +68,24 @@ const TwinDetailsPage = () => {
           return;
         }
 
-        // Use raw SQL query for fetching twin categories since twin_categories might not be in types
+        // Use the RPC function to fetch twin categories
         const { data: categoryJoins, error: categoryJoinsError } = await supabase
           .rpc('get_twin_categories', { twin_id_param: twinId });
 
-        if (!categoryJoinsError && categoryJoins) {
+        if (!categoryJoinsError && categoryJoins && categoryJoins.length > 0) {
           const categoryIds = categoryJoins.map(item => item.category_id);
           setTwinCategories(categoryIds);
           
-          // Fetch category details
-          if (categoryIds.length > 0) {
-            const { data: categoryData, error: categoriesError } = await supabase
-              .rpc('get_categories_by_ids', { category_ids_param: categoryIds });
-            
-            if (!categoriesError && categoryData) {
-              setCategories(categoryData);
-            }
+          // Fetch category details using the RPC function
+          const { data: categoryData, error: categoriesError } = await supabase
+            .rpc('get_categories_by_ids', { category_ids_param: categoryIds });
+          
+          if (!categoriesError && categoryData) {
+            setCategories(categoryData);
           }
         }
 
-        // Need to explicitly cast twinData to match the TwinDetail type with all required fields
+        // Add missing fields with defaults to ensure the twin object matches TwinDetail type
         const twinWithDefaults: TwinDetail = {
           ...twinData,
           features: twinData.features || null,
@@ -140,7 +141,7 @@ const TwinDetailsPage = () => {
       });
     }
   };
-
+  
   if (loading) {
     return (
       <Layout>
