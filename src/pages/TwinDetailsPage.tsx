@@ -66,11 +66,13 @@ const TwinDetailsPage = () => {
           }
         }
 
-        // Cast the data to TwinDetail type
+        // Cast the data to TwinDetail type, handling the JSONB fields properly
         const twinWithDefaults: TwinDetail = {
           ...twinData as unknown as TwinDetail,
-          features: twinData.features || null,
-          model_data: twinData.model_data || null,
+          // Convert features to object or set to null if not an object
+          features: typeof twinData.features === 'object' ? twinData.features : null,
+          // Convert model_data to object or set to null if not an object
+          model_data: typeof twinData.model_data === 'object' ? twinData.model_data : null,
           processing_status: twinData.processing_status || 'pending'
         };
 
