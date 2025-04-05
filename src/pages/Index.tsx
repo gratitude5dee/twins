@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const Index = () => {
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
             <div className="space-y-6">
               <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm font-medium transition-all hover:bg-muted/80">
-                Introducing AgentForge
+                introducing agency
               </div>
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
                 Create <span className="gradient-text">AI Agents</span> Tailored to Your Needs
