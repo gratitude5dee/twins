@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,54 +29,58 @@ import NotFound from "./pages/NotFound";
 // We use a single QueryClient instance for the entire app
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/create-twin" 
-              element={
-                <ProtectedRoute>
-                  <CreateTwin />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/twin/:twinId" 
-              element={
-                <ProtectedRoute>
-                  <TwinDetailsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/chat/:twinId" 
-              element={
-                <ProtectedRoute>
-                  <TwinChat />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/create-twin" 
+                  element={
+                    <ProtectedRoute>
+                      <CreateTwin />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/twin/:twinId" 
+                  element={
+                    <ProtectedRoute>
+                      <TwinDetailsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/chat/:twinId" 
+                  element={
+                    <ProtectedRoute>
+                      <TwinChat />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
