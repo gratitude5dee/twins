@@ -1,31 +1,41 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 const Header = () => {
-  const {
-    user,
-    signOut
-  } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
+
   const getInitials = () => {
     if (!user?.email) return 'U';
     return user.email.charAt(0).toUpperCase();
   };
-  return <header className="border-b border-border py-4 px-4 sm:px-6">
+
+  return (
+    <header className="border-b border-border py-4 px-4 sm:px-6">
       <div className="container flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <div className="w-9 h-9 rounded-full gradient-bg flex items-center justify-center text-white shadow-md">
             <Sparkles size={20} />
           </div>
-          <span className="font-display font-bold text-xl">agency : OS digital twin repository</span>
+          <span className="font-display font-bold text-xl">Digital Twin Hub</span>
         </Link>
         
         <div className="flex items-center space-x-4">
@@ -33,17 +43,20 @@ const Header = () => {
             <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
               Home
             </Link>
-            {user && <>
+            {user && (
+              <>
                 <Link to="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
                   My Twins
                 </Link>
                 <Link to="/create-twin" className="text-sm font-medium hover:text-primary transition-colors">
                   Create Twin
                 </Link>
-              </>}
+              </>
+            )}
           </nav>
           
-          {user ? <DropdownMenu>
+          {user ? (
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
@@ -65,11 +78,16 @@ const Header = () => {
                   <span>Sign Out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu> : <Button size="sm" onClick={() => navigate('/auth')}>
+            </DropdownMenu>
+          ) : (
+            <Button size="sm" onClick={() => navigate('/auth')}>
               Sign In
-            </Button>}
+            </Button>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Header;
