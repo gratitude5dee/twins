@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
@@ -61,7 +62,7 @@ const CreateTwin = () => {
 
   const {getRootProps, getInputProps, isDragActive} = useDropzone({
     onDrop,
-    accept: 'image/*',
+    accept: {'image/*': []},
     maxFiles: 1,
   });
 
@@ -505,8 +506,8 @@ const CreateTwin = () => {
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                   </Button>
-                  <Button onClick={handleSubmit} disabled={createTwinMutation.isLoading} className="w-full">
-                    {createTwinMutation.isLoading ? (
+                  <Button onClick={handleSubmit} disabled={createTwinMutation.isPending} className="w-full">
+                    {createTwinMutation.isPending ? (
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Creating...
@@ -531,8 +532,8 @@ const CreateTwin = () => {
             Back
           </Button>
           {currentStep === 'confirmation' ? (
-            <Button onClick={handleSubmit} disabled={createTwinMutation.isLoading}>
-              {createTwinMutation.isLoading ? (
+            <Button onClick={handleSubmit} disabled={createTwinMutation.isPending}>
+              {createTwinMutation.isPending ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
