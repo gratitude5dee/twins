@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -257,19 +258,23 @@ const CreateTwin = () => {
       }
 
       // Store secrets for the agent if any are defined
-      if (Object.keys(agentSecrets).length > 0) {
+      if (Object.keys(agentSecrets).length > 0 && session?.access_token) {
         try {
-          const { error: secretsError } = await supabase
-            .from('agent_secrets')
-            .insert([{
-              twin_id: twin.id,
-              owner_id: user.id,
+          // Store agent secrets using the edge function instead of direct DB access
+          const response = await fetch(`${supabaseUrl}/functions/v1/store-agent-secrets`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({
+              twinId: twin.id,
               secrets: agentSecrets
-            }]);
-            
-          if (secretsError) {
-            console.error('Error storing secrets:', secretsError);
-            // Don't fail the entire creation if just secrets fail
+            })
+          });
+          
+          if (!response.ok) {
+            console.error('Error storing secrets:', await response.text());
             toast({
               title: "Secrets Warning",
               description: "Agent created, but secrets couldn't be stored.",
@@ -278,6 +283,11 @@ const CreateTwin = () => {
           }
         } catch (secretsErr) {
           console.error('Exception storing secrets:', secretsErr);
+          toast({
+            title: "Secrets Warning",
+            description: "Agent created, but secrets couldn't be stored.",
+            variant: "destructive"
+          });
         }
       }
 
@@ -528,67 +538,78 @@ const CreateTwin = () => {
 
         <div className="flex justify-center mb-8">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as WizardStep)} className="w-full max-w-4xl">
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-5 mb-4">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="basic" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <UserCircle className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Basic Info</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>Basic agent information</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="model" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <BrainCircuit className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Model</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>Model provider and settings</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="personality" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Personality</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>Agent personality and behavior</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="integrations" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <Share className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Integrations</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>Connect to external platforms</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="secrets" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <Zap className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Secrets</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>API keys and sensitive information</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </TabsList>
+            {/* New modern horizontal menu with icons and tooltips */}
+            <div className="flex justify-center mb-6">
+              <div className="bg-muted/20 rounded-full p-1.5 inline-flex">
+                <TabsList className="flex space-x-1 bg-transparent h-auto p-0">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="basic" className="rounded-full h-12 w-12 flex items-center justify-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <UserCircle className="h-6 w-6" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Basic Info</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="model" className="rounded-full h-12 w-12 flex items-center justify-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <BrainCircuit className="h-6 w-6" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Model</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="personality" className="rounded-full h-12 w-12 flex items-center justify-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <MessageSquare className="h-6 w-6" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Personality</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="integrations" className="rounded-full h-12 w-12 flex items-center justify-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <Share className="h-6 w-6" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Integrations</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="secrets" className="rounded-full h-12 w-12 flex items-center justify-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <Zap className="h-6 w-6" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Secrets</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="confirmation" className="rounded-full h-12 w-12 flex items-center justify-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                          <Settings className="h-6 w-6" />
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Confirmation</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TabsList>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
               {/* Left sidebar - Table of Contents */}
@@ -1013,7 +1034,7 @@ const CreateTwin = () => {
                               </Button>
                               
                               {activeTab !== 'confirmation' ? (
-                                <Button type="button" variant="primary" onClick={handleNext}>
+                                <Button type="button" onClick={handleNext} variant="default">
                                   Next: {
                                     activeTab === 'basic' ? 'Model' :
                                     activeTab === 'model' ? 'Personality' :
