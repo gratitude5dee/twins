@@ -85,21 +85,26 @@ async def http_bot_pipeline(
     # Fetch the twin's personality data
     twin_data = None
     try:
-        # First, get the conversation to find the twin_id
-        conversation_query = select(Conversation).where(Conversation.conversation_id == params.conversation_id)
-        conversation_result = await db.execute(conversation_query)
-        conversation = conversation_result.scalars().first()
+        if params.twin_id:
+            # If twin_id is provided directly, use it
+            twin_id = params.twin_id
+        else:
+            # Get the conversation to find the twin_id
+            conversation_query = select(Conversation).where(Conversation.conversation_id == params.conversation_id)
+            conversation_result = await db.execute(conversation_query)
+            conversation = conversation_result.scalars().first()
+            twin_id = conversation.twin_id if conversation else None
         
-        if conversation and conversation.twin_id:
+        if twin_id:
             # Now fetch the twin data from digital_twins table
             metadata = MetaData()
             digital_twins = Table('digital_twins', metadata, autoload_with=db.get_bind())
             
-            twin_query = select(digital_twins).where(digital_twins.c.id == conversation.twin_id)
+            twin_query = select(digital_twins).where(digital_twins.c.id == twin_id)
             twin_result = await db.execute(twin_query)
             twin_data = twin_result.mappings().first()
             
-            logger.info(f"Fetched twin data for {conversation.twin_id}: {twin_data.keys() if twin_data else 'None'}")
+            logger.info(f"Fetched twin data for {twin_id}: {twin_data.keys() if twin_data else 'None'}")
     except Exception as e:
         logger.error(f"Error fetching twin personality data: {e}")
         twin_data = None

@@ -98,15 +98,19 @@ async def bot_pipeline(
     # Fetch the twin's personality data
     twin_data = None
     try:
-        # Fetch the twin data from digital_twins table
-        metadata = MetaData()
-        digital_twins = Table('digital_twins', metadata, autoload_with=db.get_bind())
+        # If twin_id is provided directly, use it
+        twin_id = params.twin_id or conversation.twin_id
         
-        twin_query = select(digital_twins).where(digital_twins.c.id == conversation.twin_id)
-        twin_result = await db.execute(twin_query)
-        twin_data = twin_result.mappings().first()
-        
-        logger.info(f"Fetched twin data for {conversation.twin_id}: {twin_data.keys() if twin_data else 'None'}")
+        if twin_id:
+            # Fetch the twin data from digital_twins table
+            metadata = MetaData()
+            digital_twins = Table('digital_twins', metadata, autoload_with=db.get_bind())
+            
+            twin_query = select(digital_twins).where(digital_twins.c.id == twin_id)
+            twin_result = await db.execute(twin_query)
+            twin_data = twin_result.mappings().first()
+            
+            logger.info(f"Fetched twin data for {twin_id}: {twin_data.keys() if twin_data else 'None'}")
     except Exception as e:
         logger.error(f"Error fetching twin personality data: {e}")
         twin_data = None
@@ -120,10 +124,7 @@ async def bot_pipeline(
     if system_prompt and (not messages or (messages and messages[0].get('role') != "system")):
         messages.insert(0, {"role": "system", "content": system_prompt})
 
-    #
-    # RTVI
-    #
-
+    # ... keep existing code for the rest of the function
     llm_rt = GeminiMultimodalLiveLLMService(
         api_key=str(SERVICE_API_KEYS["gemini"]),
         voice_id="Aoede",  # Puck, Charon, Kore, Fenrir, Aoede
