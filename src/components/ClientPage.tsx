@@ -10,11 +10,15 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import Settings from "@/components/Settings";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import emitter from "@/lib/eventEmitter";
+import { Message } from "@/lib/messages";
 
 export const ClientPage = () => {
   const { toast } = useToast();
   const { conversationId, conversationType, setConversationType } = useAppState();
   const [showSettings, setShowSettings] = useState(false);
+  
+  // Mock data for messages - this will be replaced with actual data fetching in a future step
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     // Register event listeners
@@ -66,7 +70,9 @@ export const ClientPage = () => {
         ) : (
           <>
             <div className="flex-1 overflow-auto px-4 py-6">
-              <ChatMessages />
+              <div className="max-w-3xl mx-auto">
+                <ChatMessages messages={messages} />
+              </div>
             </div>
             <ChatControls />
           </>

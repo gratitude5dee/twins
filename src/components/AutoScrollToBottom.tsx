@@ -14,7 +14,7 @@ export default function AutoScrollToBottom({ behavior = "auto" }: Props) {
 
     if (!scroller) return;
 
-    scroller.scrollTo({
+    scroller?.scrollTo({
       behavior,
       top: scroller.scrollHeight,
     });
