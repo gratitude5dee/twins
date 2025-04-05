@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import CreateTwin from "./pages/CreateTwin";
 import TwinChat from "./pages/TwinChat";
+import TwinDetailsPage from "./pages/TwinDetailsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CreateTwin />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/twin/:twinId" 
+              element={
+                <ProtectedRoute>
+                  <TwinDetailsPage />
                 </ProtectedRoute>
               } 
             />
