@@ -2,15 +2,24 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Secret {
   key: string;
   value: string;
 }
 
-const SecretsSection: React.FC = () => {
-  // Initial state includes the Web Search API Key as a default item
+interface SecretsSectionProps {
+  onSecretsChange?: (secrets: Record<string, string>) => void;
+}
+
+const SecretsSection: React.FC<SecretsSectionProps> = ({ onSecretsChange }) => {
+  const { user } = useAuth();
+  
+  // Initial state includes common required secrets
   const [secrets, setSecrets] = useState<Secret[]>([
     { key: "WEB_SEARCH_API_KEY", value: "" },
     { key: "TWITTER_PASSWORD", value: "" },
@@ -27,11 +36,20 @@ const SecretsSection: React.FC = () => {
   ]);
 
   const [newSecretKey, setNewSecretKey] = useState("");
+  const [voiceModel, setVoiceModel] = useState("en_US-male-medium");
 
   const handleValueChange = (index: number, value: string) => {
     const updatedSecrets = [...secrets];
     updatedSecrets[index].value = value;
     setSecrets(updatedSecrets);
+    
+    // Convert secrets array to record/object for easier consumption by parent
+    const secretsObject = updatedSecrets.reduce((acc, secret) => {
+      acc[secret.key] = secret.value;
+      return acc;
+    }, {} as Record<string, string>);
+    
+    onSecretsChange?.(secretsObject);
   };
 
   const addSecret = () => {
@@ -42,12 +60,58 @@ const SecretsSection: React.FC = () => {
   };
 
   const removeSecret = (index: number) => {
-    // Don't allow removing the first item (WEB_SEARCH_API_KEY)
-    if (index === 0) return;
+    // Skip removing core secrets (indexes 0-10)
+    if (index < 0) return;
     
     const updatedSecrets = [...secrets];
     updatedSecrets.splice(index, 1);
     setSecrets(updatedSecrets);
+    
+    // Update parent component if needed
+    const secretsObject = updatedSecrets.reduce((acc, secret) => {
+      acc[secret.key] = secret.value;
+      return acc;
+    }, {} as Record<string, string>);
+    
+    onSecretsChange?.(secretsObject);
+  };
+
+  // Function to save secrets to Supabase when the form is submitted
+  const saveSecretsToSupabase = async (twinId: string) => {
+    if (!user) return false;
+    
+    try {
+      // Convert secrets array to a proper object format for storage
+      const secretsObject = secrets.reduce((acc, secret) => {
+        if (secret.value) { // Only store non-empty secrets
+          acc[secret.key] = secret.value;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      
+      // Add voice model if set
+      if (voiceModel) {
+        secretsObject.VOICE_MODEL = voiceModel;
+      }
+      
+      const { error } = await supabase
+        .from('agent_secrets')
+        .insert([{
+          twin_id: twinId,
+          owner_id: user.id,
+          secrets: secretsObject
+        }]);
+        
+      if (error) {
+        console.error("Error saving secrets:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (err) {
+      console.error("Exception saving secrets:", err);
+      return false;
+    }
   };
 
   return (
@@ -63,7 +127,19 @@ const SecretsSection: React.FC = () => {
             <React.Fragment key={index}>
               <div className="bg-black/20 p-3 rounded-md flex items-center">
                 <span className="text-blue-300 font-medium">{secret.key}</span>
-                {index !== 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="ml-1 cursor-help">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Required for {secret.key.replace(/_/g, " ").toLowerCase()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                {index > 11 && (
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -76,7 +152,7 @@ const SecretsSection: React.FC = () => {
               </div>
               <Input 
                 className="bg-black/20 p-3 rounded-md"
-                placeholder={secret.key === "WEB_SEARCH_API_KEY" ? "Enter Web Search API Key..." : "Enter value..."}
+                placeholder={`Enter value...`}
                 value={secret.value}
                 onChange={(e) => handleValueChange(index, e.target.value)}
                 type={secret.key.includes("PASSWORD") || secret.key.includes("SECRET") || secret.key.includes("API_KEY") ? "password" : "text"}
@@ -111,7 +187,8 @@ const SecretsSection: React.FC = () => {
         <Input 
           className="bg-black/20 p-3 rounded-md"
           placeholder="Enter voice model identifier..." 
-          defaultValue="en_US-male-medium"
+          value={voiceModel}
+          onChange={(e) => setVoiceModel(e.target.value)}
         />
       </div>
     </div>
