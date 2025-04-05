@@ -1,18 +1,17 @@
-
 import asyncio
-from typing import Any, AsyncGenerator, Dict, List, Tuple
+from typing import Any, AsyncGenerator, List, Tuple
 
 from bots.http.frame_serializer import BotFrameSerializer
 from bots.persistent_context import PersistentContext
 from bots.rtvi import create_rtvi_processor
 from bots.types import BotConfig, BotParams
-from common.config import SERVICE_API_KEYS, DEFAULT_LLM_CONTEXT
-from common.models import Attachment, Message, Conversation
+from common.config import SERVICE_API_KEYS
+from common.context_utils import initialize_chat_context
+from common.models import Attachment, Message
 from fastapi import HTTPException, status
 from loguru import logger
 from openai._types import NOT_GIVEN
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, Table, MetaData
 
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
@@ -24,47 +23,7 @@ from pipecat.processors.frameworks.rtvi import (
     RTVIMessage,
     RTVIProcessor,
 )
-from pipecat.services.ai_services import OpenAILLMContext
 from pipecat.services.google import GoogleLLMContext, GoogleLLMService
-
-
-async def build_system_prompt(twin_data: Dict) -> str:
-    """Builds a system prompt based on twin personality data"""
-    if not twin_data:
-        # Fallback to default prompt if no twin data is available
-        return DEFAULT_LLM_CONTEXT[0]['content']['content']
-    
-    try:
-        name = twin_data.get('name', 'WZRD')
-        description = twin_data.get('description', '')
-        
-        # Extract personality data from features and model_data
-        features = twin_data.get('features', {}) or {}
-        model_data = twin_data.get('model_data', {}) or {}
-        
-        bio = features.get('bio', '') if features else ''
-        lore = features.get('lore', '') if features else ''
-        knowledge = features.get('knowledge', '') if features else ''
-        
-        # Construct the system prompt with the personality data
-        system_prompt = f"""You are {name}, a digital twin with the following traits:
-
-Description: {description}
-
-Bio: {bio}
-
-Lore: {lore}
-
-Knowledge: {knowledge}
-
-Always stay in character as {name} during this conversation. Keep your responses brief when possible. Avoid bold and italic text formatting in your responses. You may reference your background knowledge when answering questions."""
-
-        logger.debug(f"Generated system prompt for {name}: {system_prompt[:100]}...")
-        return system_prompt
-        
-    except Exception as e:
-        logger.error(f"Error building system prompt from twin data: {e}")
-        return DEFAULT_LLM_CONTEXT[0]['content']['content']
 
 
 async def http_bot_pipeline(
@@ -82,49 +41,15 @@ async def http_bot_pipeline(
             detail="Service `llm` not available in SERVICE_API_KEYS. Please check your environment variables.",
         )
 
-    # Fetch the twin's personality data
-    twin_data = None
-    try:
-        if params.twin_id:
-            # If twin_id is provided directly, use it
-            twin_id = params.twin_id
-        else:
-            # Get the conversation to find the twin_id
-            conversation_query = select(Conversation).where(Conversation.conversation_id == params.conversation_id)
-            conversation_result = await db.execute(conversation_query)
-            conversation = conversation_result.scalars().first()
-            twin_id = conversation.twin_id if conversation else None
-        
-        if twin_id:
-            # Now fetch the twin data from digital_twins table
-            metadata = MetaData()
-            digital_twins = Table('digital_twins', metadata, autoload_with=db.get_bind())
-            
-            twin_query = select(digital_twins).where(digital_twins.c.id == twin_id)
-            twin_result = await db.execute(twin_query)
-            twin_data = twin_result.mappings().first()
-            
-            logger.info(f"Fetched twin data for {twin_id}: {twin_data.keys() if twin_data else 'None'}")
-    except Exception as e:
-        logger.error(f"Error fetching twin personality data: {e}")
-        twin_data = None
+    # Initialize the LLM context
+    context, _ = await initialize_chat_context(db, params.conversation_id, params.twin_id)
 
-    # Build the system prompt based on twin data
-    system_message = await build_system_prompt(twin_data)
-    
-    # Initialize with system message first if available
-    if system_message:
-        if not messages or (messages and messages[0].get('content', {}).get('role') != "system"):
-            messages.insert(0, {"content": {"role": "system", "content": system_message}})
-    
     llm = GoogleLLMService(
         api_key=str(SERVICE_API_KEYS["gemini"]),
         model="gemini-2.0-flash-exp",
     )
 
-    # ... keep existing code for the rest of the function
     tools = NOT_GIVEN
-    context = OpenAILLMContext(messages, tools)
     context_aggregator = llm.create_context_aggregator(
         context, assistant_expect_stripped_words=False
     )
