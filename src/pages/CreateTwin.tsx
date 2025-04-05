@@ -406,58 +406,76 @@ const CreateTwin = () => {
                 <TabsTrigger value="text">Text</TabsTrigger>
                 <TabsTrigger value="json">JSON</TabsTrigger>
               </TabsList>
-            </Tabs>
-          </div>
-          
-          <div className="bg-gray-200 p-6 rounded-lg">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-600">GENERAL</h3>
               
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-500">Name</p>
-                  <p className="font-medium">{formValues.name}</p>
-                </div>
-                
-                <div>
-                  <p className="text-gray-500">Avatar</p>
-                  <div className="flex items-center">
-                    <Avatar className="h-12 w-12 bg-green-100 border-2 border-green-400">
-                      {imageUrl ? (
-                        <AvatarImage src={imageUrl} alt="Avatar" />
-                      ) : (
-                        <AvatarFallback>
-                          <span className="text-xl">😎</span>
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  </div>
-                </div>
-                
-                <div>
-                  <p className="text-gray-500">Model provider</p>
-                  <p className="font-medium">{formValues.modelProvider}</p>
-                </div>
-                
-                <div>
-                  <p className="text-gray-500">Clients</p>
-                  <p className="font-medium">
-                    {formValues.clients.length > 0 
-                      ? formValues.clients.map(getClientLabel).join(", ") 
-                      : "None"}
-                  </p>
-                </div>
+              <TabsContent value="text">
+                <div className="bg-gray-200 p-6 rounded-lg">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-600">GENERAL</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-gray-500">Name</p>
+                        <p className="font-medium">{formValues.name}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-gray-500">Avatar</p>
+                        <div className="flex items-center">
+                          <Avatar className="h-12 w-12 bg-green-100 border-2 border-green-400">
+                            {imageUrl ? (
+                              <AvatarImage src={imageUrl} alt="Avatar" />
+                            ) : (
+                              <AvatarFallback>
+                                <span className="text-xl">😎</span>
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="text-gray-500">Model provider</p>
+                        <p className="font-medium">{formValues.modelProvider}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-gray-500">Clients</p>
+                        <p className="font-medium">
+                          {formValues.clients.length > 0 
+                            ? formValues.clients.map(getClientLabel).join(", ") 
+                            : "None"}
+                        </p>
+                      </div>
 
-                {formValues.clients.includes("twitter") && (
-                  <div>
-                    <p className="text-gray-500">Social Links</p>
-                    <p className="font-medium">
-                      X (Twitter): <span className="text-blue-500">https://x.com/tdjt45</span>
-                    </p>
+                      {formValues.clients.includes("twitter") && (
+                        <div>
+                          <p className="text-gray-500">Social Links</p>
+                          <p className="font-medium">
+                            X (Twitter): <span className="text-blue-500">https://x.com/tdjt45</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="json">
+                <div className="bg-gray-200 p-6 rounded-lg">
+                  <pre className="text-xs overflow-auto">
+                    {JSON.stringify({
+                      name: formValues.name,
+                      model: formValues.modelProvider,
+                      clients: formValues.clients,
+                      plugins: formValues.plugins,
+                      bio: bioStatements,
+                      lore: loreItems,
+                      knowledge: knowledgeItems
+                    }, null, 2)}
+                  </pre>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
         
@@ -571,454 +589,454 @@ const CreateTwin = () => {
                 </Tooltip>
               </TooltipProvider>
             </TabsList>
-          </Tabs>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {/* Left sidebar - Table of Contents */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="pt-6">
-                <h2 className="text-lg font-semibold mb-4">Table of Contents</h2>
-                <div className="space-y-1">
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-name')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Name
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-avatar')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Avatar
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-model')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Model provider
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-clients')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Clients
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-plugins')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Plugins
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-bio')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Bio
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-lore')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Lore
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-knowledge')?.scrollIntoView({
-                  behavior: 'smooth'
-                })}>
-                    Knowledge
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main content */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardContent className="pt-6">
-                {isConfirmationStep ? (
-                  renderConfirmationView()
-                ) : (
-                  <>
-                    <h2 className="text-2xl font-bold mb-6">Start with a template</h2>
-                    <p className="mb-6">
-                      Using the inputs below, craft a unique and engaging personality for your AI agent. 
-                      Check our <a href="#" className="text-primary underline">guide</a> for this step.
-                    </p>
-
-                    <div className="bg-muted/30 p-6 rounded-lg mb-10">
-                      <h3 className="text-lg font-semibold mb-4">Templates</h3>
-                      <p className="mb-4">Use one of the options below to prefill the fields.</p>
-                      
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {templates.map(template => (
-                          <button 
-                            key={template.id} 
-                            className={`p-3 rounded-md hover:bg-secondary/80 transition-colors ${template.id === 'trump' ? 'bg-primary/20' : 'bg-secondary/50'}`}
-                            onClick={() => applyTemplate(template.id)}
-                          >
-                            {template.name}
-                          </button>
-                        ))}
-                      </div>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+              {/* Left sidebar - Table of Contents */}
+              <div className="lg:col-span-1">
+                <Card>
+                  <CardContent className="pt-6">
+                    <h2 className="text-lg font-semibold mb-4">Table of Contents</h2>
+                    <div className="space-y-1">
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-name')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Name
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-avatar')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Avatar
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-model')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Model provider
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-clients')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Clients
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-plugins')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Plugins
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-bio')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Bio
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-lore')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Lore
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => document.getElementById('section-knowledge')?.scrollIntoView({
+                      behavior: 'smooth'
+                    })}>
+                        Knowledge
+                      </Button>
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <TabsContent value="basic">
-                          {/* Name section */}
-                          <div id="section-name" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Name</h2>
-                            <p className="text-muted-foreground mb-4">The character's display name for identification and in conversations</p>
-                            
-                            <FormField control={form.control} name="name" render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input placeholder="Enter agent name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )} />
-                          </div>
+              {/* Main content */}
+              <div className="lg:col-span-3">
+                <Card>
+                  <CardContent className="pt-6">
+                    {isConfirmationStep ? (
+                      renderConfirmationView()
+                    ) : (
+                      <>
+                        <h2 className="text-2xl font-bold mb-6">Start with a template</h2>
+                        <p className="mb-6">
+                          Using the inputs below, craft a unique and engaging personality for your AI agent. 
+                          Check our <a href="#" className="text-primary underline">guide</a> for this step.
+                        </p>
 
-                          {/* Avatar section */}
-                          <div id="section-avatar" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Avatar</h2>
-                            <p className="text-muted-foreground mb-4">Update your avatar effortlessly by simply clicking on it</p>
-                            
-                            <div className="flex items-center justify-center mb-4">
-                              <Sheet>
-                                <SheetTrigger asChild>
-                                  <div className="cursor-pointer relative inline-block">
-                                    <Avatar className="h-32 w-32">
-                                      {imageUrl ? (
-                                        <AvatarImage src={imageUrl} alt="Avatar" />
-                                      ) : (
-                                        <AvatarFallback className="flex flex-col items-center justify-center bg-secondary">
-                                          <ImagePlus className="h-10 w-10 text-muted-foreground" />
-                                          <span className="text-xs text-muted-foreground mt-1">Click to upload</span>
-                                        </AvatarFallback>
-                                      )}
-                                    </Avatar>
-                                  </div>
-                                </SheetTrigger>
-                                <SheetContent>
-                                  <SheetHeader>
-                                    <SheetTitle>Upload Avatar</SheetTitle>
-                                    <SheetDescription>
-                                      Upload an image to use as your agent's avatar.
-                                    </SheetDescription>
-                                  </SheetHeader>
-                                  <div className="py-6">
-                                    <TwinImageUpload onImageUploaded={handleImageUploaded} existingImageUrl={imageUrl} />
-                                  </div>
-                                </SheetContent>
-                              </Sheet>
-                            </div>
-                            <p className="text-center font-semibold mb-1">😎</p>
-                            <p className="text-center text-sm text-muted-foreground">Click to upload or change</p>
-                          </div>
-                        </TabsContent>
-
-                        <TabsContent value="model">
-                          {/* Model provider section */}
-                          <div id="section-model" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Model provider</h2>
-                            <p className="text-muted-foreground mb-4">The AI model provider, such as OpenAI or Anthropic</p>
-                            
-                            <FormField control={form.control} name="modelProvider" render={({ field }) => (
-                              <FormItem>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a model provider" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {modelProviders.map(provider => (
-                                      <SelectItem key={provider.value} value={provider.value}>
-                                        {provider.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )} />
-                          </div>
-                        </TabsContent>
-
-                        <TabsContent value="personality">
-                          {/* Bio section */}
-                          <div id="section-bio" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Bio</h2>
-                            <p className="text-muted-foreground mb-4">Background information for your character. Includes biographical details about the character, either as one complete biography or several statements that vary.</p>
-                            
-                            <div className="space-y-3 mb-4">
-                              {bioStatements.map((statement, index) => (
-                                <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
-                                  <p className="flex-grow">{statement}</p>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveBioStatement(index)}>
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Input 
-                                value={newBioStatement} 
-                                onChange={e => setNewBioStatement(e.target.value)} 
-                                placeholder="Add new bio statement..." 
-                                className="flex-grow" 
-                              />
-                              <Button 
-                                type="button" 
-                                onClick={handleAddBioStatement} 
-                                disabled={!newBioStatement.trim()}
-                              >
-                                <Plus className="h-4 w-4 mr-1" /> Add
-                              </Button>
-                            </div>
-                          </div>
-
-                          {/* Lore section */}
-                          <div id="section-lore" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Lore</h2>
-                            <p className="text-muted-foreground mb-4">Backstory elements and unique character traits. These help define personality and can be randomly sampled in conversations.</p>
-                            
-                            <div className="space-y-3 mb-4">
-                              {loreItems.map((item, index) => (
-                                <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
-                                  <p className="flex-grow">{item}</p>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveLoreItem(index)}>
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Input 
-                                value={newLoreItem} 
-                                onChange={e => setNewLoreItem(e.target.value)} 
-                                placeholder="Add new lore..." 
-                                className="flex-grow" 
-                              />
-                              <Button 
-                                type="button" 
-                                onClick={handleAddLoreItem} 
-                                disabled={!newLoreItem.trim()}
-                              >
-                                <Plus className="h-4 w-4 mr-1" /> Add
-                              </Button>
-                            </div>
-                          </div>
-
-                          {/* Knowledge section */}
-                          <div id="section-knowledge" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Knowledge</h2>
-                            <p className="text-muted-foreground mb-4">Facts or references to ground the character's responses</p>
-                            
-                            <div className="space-y-3 mb-4">
-                              {knowledgeItems.map((item, index) => (
-                                <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
-                                  <p className="flex-grow">{item}</p>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveKnowledgeItem(index)}>
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Input 
-                                value={newKnowledgeItem} 
-                                onChange={e => setNewKnowledgeItem(e.target.value)} 
-                                placeholder="Add new knowledge..." 
-                                className="flex-grow" 
-                              />
-                              <Button 
-                                type="button" 
-                                onClick={handleAddKnowledgeItem} 
-                                disabled={!newKnowledgeItem.trim()}
-                              >
-                                <Plus className="h-4 w-4 mr-1" /> Add
-                              </Button>
-                            </div>
-                          </div>
-                        </TabsContent>
-
-                        <TabsContent value="integrations">
-                          {/* Clients section */}
-                          <div id="section-clients" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Clients</h2>
-                            <p className="text-muted-foreground mb-4">Supported client types, such as Discord or X</p>
-                            
-                            <FormField control={form.control} name="clients" render={() => (
-                              <FormItem>
-                                <div className="space-y-4">
-                                  {clientTypes.map(client => (
-                                    <FormField 
-                                      key={client.value} 
-                                      control={form.control} 
-                                      name="clients" 
-                                      render={({ field }) => {
-                                        return (
-                                          <FormItem key={client.value} className="flex flex-row items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                              <Checkbox 
-                                                checked={field.value?.includes(client.value)} 
-                                                onCheckedChange={(checked) => {
-                                                  return checked
-                                                    ? field.onChange([...field.value, client.value])
-                                                    : field.onChange(field.value?.filter(value => value !== client.value))
-                                                }} 
-                                              />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                              {client.label}
-                                            </FormLabel>
-                                          </FormItem>
-                                        )
-                                      }} 
-                                    />
-                                  ))}
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )} />
-                          </div>
-
-                          {/* Plugins section */}
-                          <div id="section-plugins" className="border-t pt-6">
-                            <h2 className="text-2xl font-bold mb-2">Plugins <span className="text-muted-foreground font-normal text-sm">Optional</span></h2>
-                            <p className="text-muted-foreground mb-4">Plugins extend your agent's core functionality with additional features</p>
-                            
-                            <FormField control={form.control} name="plugins" render={() => (
-                              <FormItem>
-                                <div className="space-y-4">
-                                  <p className="text-sm font-medium">Select one or multiple plugins</p>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {pluginOptions.map(plugin => (
-                                      <FormField 
-                                        key={plugin.value} 
-                                        control={form.control} 
-                                        name="plugins" 
-                                        render={({ field }) => {
-                                          return (
-                                            <FormItem key={plugin.value} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                              <FormControl>
-                                                <Checkbox 
-                                                  checked={field.value?.includes(plugin.value)} 
-                                                  onCheckedChange={(checked) => {
-                                                    return checked
-                                                      ? field.onChange([...field.value, plugin.value])
-                                                      : field.onChange(field.value?.filter(value => value !== plugin.value))
-                                                  }} 
-                                                />
-                                              </FormControl>
-                                              <div className="space-y-1 leading-none">
-                                                <FormLabel className="font-medium">
-                                                  {plugin.label}
-                                                </FormLabel>
-                                                <p className="text-sm text-muted-foreground">
-                                                  Enable {plugin.label.toLowerCase()} capabilities
-                                                </p>
-                                              </div>
-                                            </FormItem>
-                                          )
-                                        }} 
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )} />
-                          </div>
-                        </TabsContent>
-
-                        <TabsContent value="secrets">
-                          {/* Secrets section */}
-                          <SecretsSection onSecretsChange={handleSecretsChange} />
-                        </TabsContent>
-
-                        <TabsContent value="confirmation">
-                          {renderConfirmationView()}
-                        </TabsContent>
-
-                        {/* Categories section */}
-                        {categories.length > 0 && (
-                          <div className="border-t pt-6">
-                            <h2 className="text-xl font-bold mb-2">Categories</h2>
-                            <p className="text-muted-foreground mb-4">Assign your agent to one or more categories</p>
-                            
-                            <FormField control={form.control} name="categories" render={() => (
-                              <FormItem>
-                                <div className="grid grid-cols-2 gap-4">
-                                  {categories.map(category => (
-                                    <FormField 
-                                      key={category.id} 
-                                      control={form.control} 
-                                      name="categories" 
-                                      render={({ field }) => {
-                                        return (
-                                          <FormItem key={category.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                            <FormControl>
-                                              <Checkbox 
-                                                checked={field.value?.includes(category.id)} 
-                                                onCheckedChange={(checked) => {
-                                                  return checked
-                                                    ? field.onChange([...field.value, category.id])
-                                                    : field.onChange(field.value?.filter(value => value !== category.id))
-                                                }} 
-                                              />
-                                            </FormControl>
-                                            <div className="space-y-1 leading-none">
-                                              <FormLabel className="font-medium">
-                                                {category.name}
-                                              </FormLabel>
-                                              {category.description && (
-                                                <FormDescription>
-                                                  {category.description}
-                                                </FormDescription>
-                                              )}
-                                            </div>
-                                          </FormItem>
-                                        )
-                                      }} 
-                                    />
-                                  ))}
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )} />
-                          </div>
-                        )}
-
-                        <div className="flex justify-between space-x-4 pt-6 border-t">
-                          <Button type="button" variant="outline" onClick={handleBack} disabled={activeTab === 'basic'}>
-                            Back
-                          </Button>
+                        <div className="bg-muted/30 p-6 rounded-lg mb-10">
+                          <h3 className="text-lg font-semibold mb-4">Templates</h3>
+                          <p className="mb-4">Use one of the options below to prefill the fields.</p>
                           
-                          {activeTab !== 'confirmation' ? (
-                            <Button type="button" variant="primary" onClick={handleNext}>
-                              Next: {
-                                activeTab === 'basic' ? 'Model' :
-                                activeTab === 'model' ? 'Personality' :
-                                activeTab === 'personality' ? 'Integrations' :
-                                activeTab === 'integrations' ? 'Secrets' :
-                                'Confirmation'
-                              }
-                            </Button>
-                          ) : (
-                            <Button type="submit" disabled={isCreating} className="gradient-bg">
-                              {isCreating ? "Creating..." : "Create AI Agent"}
-                            </Button>
-                          )}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {templates.map(template => (
+                              <button 
+                                key={template.id} 
+                                className={`p-3 rounded-md hover:bg-secondary/80 transition-colors ${template.id === 'trump' ? 'bg-primary/20' : 'bg-secondary/50'}`}
+                                onClick={() => applyTemplate(template.id)}
+                              >
+                                {template.name}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </form>
-                    </Form>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+
+                        <Form {...form}>
+                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <TabsContent value="basic">
+                              {/* Name section */}
+                              <div id="section-name" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Name</h2>
+                                <p className="text-muted-foreground mb-4">The character's display name for identification and in conversations</p>
+                                
+                                <FormField control={form.control} name="name" render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input placeholder="Enter agent name" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </div>
+
+                              {/* Avatar section */}
+                              <div id="section-avatar" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Avatar</h2>
+                                <p className="text-muted-foreground mb-4">Update your avatar effortlessly by simply clicking on it</p>
+                                
+                                <div className="flex items-center justify-center mb-4">
+                                  <Sheet>
+                                    <SheetTrigger asChild>
+                                      <div className="cursor-pointer relative inline-block">
+                                        <Avatar className="h-32 w-32">
+                                          {imageUrl ? (
+                                            <AvatarImage src={imageUrl} alt="Avatar" />
+                                          ) : (
+                                            <AvatarFallback className="flex flex-col items-center justify-center bg-secondary">
+                                              <ImagePlus className="h-10 w-10 text-muted-foreground" />
+                                              <span className="text-xs text-muted-foreground mt-1">Click to upload</span>
+                                            </AvatarFallback>
+                                          )}
+                                        </Avatar>
+                                      </div>
+                                    </SheetTrigger>
+                                    <SheetContent>
+                                      <SheetHeader>
+                                        <SheetTitle>Upload Avatar</SheetTitle>
+                                        <SheetDescription>
+                                          Upload an image to use as your agent's avatar.
+                                        </SheetDescription>
+                                      </SheetHeader>
+                                      <div className="py-6">
+                                        <TwinImageUpload onImageUploaded={handleImageUploaded} existingImageUrl={imageUrl} />
+                                      </div>
+                                    </SheetContent>
+                                  </Sheet>
+                                </div>
+                                <p className="text-center font-semibold mb-1">😎</p>
+                                <p className="text-center text-sm text-muted-foreground">Click to upload or change</p>
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="model">
+                              {/* Model provider section */}
+                              <div id="section-model" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Model provider</h2>
+                                <p className="text-muted-foreground mb-4">The AI model provider, such as OpenAI or Anthropic</p>
+                                
+                                <FormField control={form.control} name="modelProvider" render={({ field }) => (
+                                  <FormItem>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select a model provider" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {modelProviders.map(provider => (
+                                          <SelectItem key={provider.value} value={provider.value}>
+                                            {provider.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="personality">
+                              {/* Bio section */}
+                              <div id="section-bio" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Bio</h2>
+                                <p className="text-muted-foreground mb-4">Background information for your character. Includes biographical details about the character, either as one complete biography or several statements that vary.</p>
+                                
+                                <div className="space-y-3 mb-4">
+                                  {bioStatements.map((statement, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
+                                      <p className="flex-grow">{statement}</p>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveBioStatement(index)}>
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <Input 
+                                    value={newBioStatement} 
+                                    onChange={e => setNewBioStatement(e.target.value)} 
+                                    placeholder="Add new bio statement..." 
+                                    className="flex-grow" 
+                                  />
+                                  <Button 
+                                    type="button" 
+                                    onClick={handleAddBioStatement} 
+                                    disabled={!newBioStatement.trim()}
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" /> Add
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Lore section */}
+                              <div id="section-lore" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Lore</h2>
+                                <p className="text-muted-foreground mb-4">Backstory elements and unique character traits. These help define personality and can be randomly sampled in conversations.</p>
+                                
+                                <div className="space-y-3 mb-4">
+                                  {loreItems.map((item, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
+                                      <p className="flex-grow">{item}</p>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveLoreItem(index)}>
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <Input 
+                                    value={newLoreItem} 
+                                    onChange={e => setNewLoreItem(e.target.value)} 
+                                    placeholder="Add new lore..." 
+                                    className="flex-grow" 
+                                  />
+                                  <Button 
+                                    type="button" 
+                                    onClick={handleAddLoreItem} 
+                                    disabled={!newLoreItem.trim()}
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" /> Add
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Knowledge section */}
+                              <div id="section-knowledge" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Knowledge</h2>
+                                <p className="text-muted-foreground mb-4">Facts or references to ground the character's responses</p>
+                                
+                                <div className="space-y-3 mb-4">
+                                  {knowledgeItems.map((item, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-3 rounded-md bg-muted/50 border">
+                                      <p className="flex-grow">{item}</p>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleRemoveKnowledgeItem(index)}>
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <Input 
+                                    value={newKnowledgeItem} 
+                                    onChange={e => setNewKnowledgeItem(e.target.value)} 
+                                    placeholder="Add new knowledge..." 
+                                    className="flex-grow" 
+                                  />
+                                  <Button 
+                                    type="button" 
+                                    onClick={handleAddKnowledgeItem} 
+                                    disabled={!newKnowledgeItem.trim()}
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" /> Add
+                                  </Button>
+                                </div>
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="integrations">
+                              {/* Clients section */}
+                              <div id="section-clients" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Clients</h2>
+                                <p className="text-muted-foreground mb-4">Supported client types, such as Discord or X</p>
+                                
+                                <FormField control={form.control} name="clients" render={() => (
+                                  <FormItem>
+                                    <div className="space-y-4">
+                                      {clientTypes.map(client => (
+                                        <FormField 
+                                          key={client.value} 
+                                          control={form.control} 
+                                          name="clients" 
+                                          render={({ field }) => {
+                                            return (
+                                              <FormItem key={client.value} className="flex flex-row items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                  <Checkbox 
+                                                    checked={field.value?.includes(client.value)} 
+                                                    onCheckedChange={(checked) => {
+                                                      return checked
+                                                        ? field.onChange([...field.value, client.value])
+                                                        : field.onChange(field.value?.filter(value => value !== client.value))
+                                                    }} 
+                                                  />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                  {client.label}
+                                                </FormLabel>
+                                              </FormItem>
+                                            )
+                                          }} 
+                                        />
+                                      ))}
+                                    </div>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </div>
+
+                              {/* Plugins section */}
+                              <div id="section-plugins" className="border-t pt-6">
+                                <h2 className="text-2xl font-bold mb-2">Plugins <span className="text-muted-foreground font-normal text-sm">Optional</span></h2>
+                                <p className="text-muted-foreground mb-4">Plugins extend your agent's core functionality with additional features</p>
+                                
+                                <FormField control={form.control} name="plugins" render={() => (
+                                  <FormItem>
+                                    <div className="space-y-4">
+                                      <p className="text-sm font-medium">Select one or multiple plugins</p>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {pluginOptions.map(plugin => (
+                                          <FormField 
+                                            key={plugin.value} 
+                                            control={form.control} 
+                                            name="plugins" 
+                                            render={({ field }) => {
+                                              return (
+                                                <FormItem key={plugin.value} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                  <FormControl>
+                                                    <Checkbox 
+                                                      checked={field.value?.includes(plugin.value)} 
+                                                      onCheckedChange={(checked) => {
+                                                        return checked
+                                                          ? field.onChange([...field.value, plugin.value])
+                                                          : field.onChange(field.value?.filter(value => value !== plugin.value))
+                                                      }} 
+                                                    />
+                                                  </FormControl>
+                                                  <div className="space-y-1 leading-none">
+                                                    <FormLabel className="font-medium">
+                                                      {plugin.label}
+                                                    </FormLabel>
+                                                    <p className="text-sm text-muted-foreground">
+                                                      Enable {plugin.label.toLowerCase()} capabilities
+                                                    </p>
+                                                  </div>
+                                                </FormItem>
+                                              )
+                                            }} 
+                                          />
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="secrets">
+                              {/* Secrets section */}
+                              <SecretsSection onSecretsChange={handleSecretsChange} />
+                            </TabsContent>
+
+                            <TabsContent value="confirmation">
+                              {renderConfirmationView()}
+                            </TabsContent>
+
+                            {/* Categories section */}
+                            {categories.length > 0 && (
+                              <div className="border-t pt-6">
+                                <h2 className="text-xl font-bold mb-2">Categories</h2>
+                                <p className="text-muted-foreground mb-4">Assign your agent to one or more categories</p>
+                                
+                                <FormField control={form.control} name="categories" render={() => (
+                                  <FormItem>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      {categories.map(category => (
+                                        <FormField 
+                                          key={category.id} 
+                                          control={form.control} 
+                                          name="categories" 
+                                          render={({ field }) => {
+                                            return (
+                                              <FormItem key={category.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                <FormControl>
+                                                  <Checkbox 
+                                                    checked={field.value?.includes(category.id)} 
+                                                    onCheckedChange={(checked) => {
+                                                      return checked
+                                                        ? field.onChange([...field.value, category.id])
+                                                        : field.onChange(field.value?.filter(value => value !== category.id))
+                                                    }} 
+                                                  />
+                                                </FormControl>
+                                                <div className="space-y-1 leading-none">
+                                                  <FormLabel className="font-medium">
+                                                    {category.name}
+                                                  </FormLabel>
+                                                  {category.description && (
+                                                    <FormDescription>
+                                                      {category.description}
+                                                    </FormDescription>
+                                                  )}
+                                                </div>
+                                              </FormItem>
+                                            )
+                                          }} 
+                                        />
+                                      ))}
+                                    </div>
+                                    <FormMessage />
+                                  </FormItem>
+                                )} />
+                              </div>
+                            )}
+
+                            <div className="flex justify-between space-x-4 pt-6 border-t">
+                              <Button type="button" variant="outline" onClick={handleBack} disabled={activeTab === 'basic'}>
+                                Back
+                              </Button>
+                              
+                              {activeTab !== 'confirmation' ? (
+                                <Button type="button" variant="primary" onClick={handleNext}>
+                                  Next: {
+                                    activeTab === 'basic' ? 'Model' :
+                                    activeTab === 'model' ? 'Personality' :
+                                    activeTab === 'personality' ? 'Integrations' :
+                                    activeTab === 'integrations' ? 'Secrets' :
+                                    'Confirmation'
+                                  }
+                                </Button>
+                              ) : (
+                                <Button type="submit" disabled={isCreating} className="gradient-bg">
+                                  {isCreating ? "Creating..." : "Create AI Agent"}
+                                </Button>
+                              )}
+                            </div>
+                          </form>
+                        </Form>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </Tabs>
         </div>
       </div>
     </Layout>

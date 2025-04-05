@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Secret {
@@ -76,43 +75,8 @@ const SecretsSection: React.FC<SecretsSectionProps> = ({ onSecretsChange }) => {
     onSecretsChange?.(secretsObject);
   };
 
-  // Function to save secrets to Supabase when the form is submitted
-  const saveSecretsToSupabase = async (twinId: string) => {
-    if (!user) return false;
-    
-    try {
-      // Convert secrets array to a proper object format for storage
-      const secretsObject = secrets.reduce((acc, secret) => {
-        if (secret.value) { // Only store non-empty secrets
-          acc[secret.key] = secret.value;
-        }
-        return acc;
-      }, {} as Record<string, string>);
-      
-      // Add voice model if set
-      if (voiceModel) {
-        secretsObject.VOICE_MODEL = voiceModel;
-      }
-      
-      const { error } = await supabase
-        .from('agent_secrets')
-        .insert([{
-          twin_id: twinId,
-          owner_id: user.id,
-          secrets: secretsObject
-        }]);
-        
-      if (error) {
-        console.error("Error saving secrets:", error);
-        return false;
-      }
-      
-      return true;
-    } catch (err) {
-      console.error("Exception saving secrets:", err);
-      return false;
-    }
-  };
+  // We'll skip the Supabase part for now since the table doesn't exist yet
+  // The parent component should handle storing secrets
 
   return (
     <div className="space-y-6">
